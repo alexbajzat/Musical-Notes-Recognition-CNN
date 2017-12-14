@@ -3,21 +3,23 @@ from src.model.LabeledModel import LabeledModel
 from os import listdir
 from os.path import isfile
 
-root = '../../dataset/'
-extension = '.JPG'
+ROOT = '../../dataset/processed/'
+EXTENSION = '.JPG'
+PROCESSED_RESCALE = 200, 200
 
-
+''' initializing dataset from root folder
+    the label is given by the directory name
+    root and extension of data must be configured before initialize
+'''
 def initDataset():
-    roots = ['1', '2']
     labeledData = []
-    for folder in listdir(root):
-        print(folder)
-        for item in listdir(root):
-            url = root + folder + "/" + item + extension
-            print(url)
+    for folder in listdir(ROOT):
+        for label in listdir(ROOT):
+            url = ROOT + folder + "/" + label + EXTENSION
             if(isfile(url)):
+                print('loading file: ' + url)
                 img = Image.open(url).convert('LA')
-                labeledData.append(LabeledModel(img, item))
+                labeledData.append(LabeledModel(img, label))
     return labeledData
 
 
