@@ -1,14 +1,13 @@
 import numpy as np
 
 
-class HiddenLayyer(object):
+class HiddenLayer(object):
     '''
     inputSize is the feature size
     output is the size of next layer
     activation class
-    hyperparams bundle of config stuff
+    hyperparams bundle of nn parameters and stuff
     '''
-
     def __init__(self, inputSize, outputSize, activation, hyperparams):
         self.__inputSize = inputSize
         self.__outputSize = outputSize
@@ -32,4 +31,6 @@ class HiddenLayyer(object):
 
         self.__weights += - self.__hyperparams.stepSize * deltaWeights
         self.__biases += - self.__hyperparams.stepSize * deltaBiases
-        return self.__weights
+
+        newGradient = np.dot(gradients, np.transpose(self.__weights))
+        return self.__activation.derivative(X, newGradient)
