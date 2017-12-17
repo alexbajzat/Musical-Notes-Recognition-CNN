@@ -10,11 +10,13 @@ class SoftMax(object):
     # returns the gradient on scores
     # todo add regularization
     def compute(self, X, labels):
-        exponentiatedScores = np.exp(X)
-        probabilites = exponentiatedScores / np.sum(exponentiatedScores, axis=1 ,keepdims=True)
 
-        # we want to increase the loss of the bad predicted classes, so e log only the correct class
-        # log(1) ~=1  => we stimulate the correct class with negative value
+        # we want to calculate loss using cross-entropy
+        # calculate the probabilities of class
+        exponentiatedScores = np.exp(X)
+        # normalize probabilities
+        probabilites = exponentiatedScores / np.sum(exponentiatedScores, axis=1 ,keepdims=True)
+        # cross-entropy
         correct = - np.log(probabilites[range(self.__datasetSize, labels)])
         dataLoss = np.sum(correct)/ self.__datasetSize
         print('loss: ' + dataLoss)

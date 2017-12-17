@@ -29,3 +29,4 @@ class NonActivation(object):
     # derivative calculation
     def derivative(self, X, gradients):
         return gradients
+

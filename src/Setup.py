@@ -3,7 +3,7 @@ from src.model.LabeledModel import LabeledModel
 from os import listdir
 from os.path import isfile
 
-ROOT = '../../dataset/processed/'
+ROOT = '../dataset/processed/'
 EXTENSION = '.JPG'
 PROCESSED_RESCALE = 200, 200
 
