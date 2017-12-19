@@ -8,7 +8,8 @@ import numpy as np
 class ReLUActivation(object):
     # 'forwarding'
     def apply(self, X):
-        np.maximum(0, X)
+        X[ X <= 0] = 0
+        return X
 
     # derivative calculation
     # threshold the input values to 0 if smaller

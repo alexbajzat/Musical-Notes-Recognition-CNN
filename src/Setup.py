@@ -1,11 +1,10 @@
-from PIL import Image;
+from PIL import Image
 from src.model.LabeledModel import LabeledModel
 from os import listdir
 from os.path import isfile
 
 ROOT = '../dataset/processed/'
-EXTENSION = '.JPG'
-PROCESSED_RESCALE = 200, 200
+PROCESSED_RESIZE = 128 , 128
 
 ''' initializing dataset from root folder
     the label is given by the directory name
@@ -14,14 +13,15 @@ PROCESSED_RESCALE = 200, 200
 def initDataset():
     labeledData = []
     for folder in listdir(ROOT):
-        for label in listdir(ROOT):
-            url = ROOT + folder + "/" + label + EXTENSION
+        print('Parsing URL: ' +  ROOT +  folder)
+        for filename in listdir(ROOT + folder):
+            url = ROOT + folder + "/" + filename
+            print(url)
             if(isfile(url)):
                 print('loading file: ' + url)
                 img = Image.open(url).convert('LA')
-                labeledData.append(LabeledModel(img, label))
+                img = img.resize(PROCESSED_RESIZE, Image.ANTIALIAS)
+                labeledData.append(LabeledModel(img, folder))
     return labeledData
 
 
-save = initDataset()
-print(save)
