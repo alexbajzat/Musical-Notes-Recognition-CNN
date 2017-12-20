@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from src.Setup import initDataset
 from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Classifiers import SoftMax
@@ -50,6 +51,9 @@ def doTheStuff():
     data = initDataset()
     datasetSize = len(data)
 
+    # randomize data for better distribution
+
+    random.shuffle(data)
     dataset = [flattenMatrix(e.getData().getdata()) for e in data], [int(e.getLabel()) for e in data]
     print(dataset)
     inputSize = len(dataset[0][0])
