@@ -4,8 +4,7 @@ from src.Setup import initDataset
 from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
-from src.model.Layer import HiddenLayer
-
+from src.model.Layers import HiddenLayer, ConvLayer
 
 '''
     hyperparamenters
@@ -54,14 +53,18 @@ def doTheStuff():
     # randomize data for better distribution
 
     random.shuffle(data)
-    dataset = [flattenMatrix(e.getData().getdata()) for e in data], [int(e.getLabel()) for e in data]
+    dataset = [np.asarray(e.getData().getdata()) for e in data], [int(e.getLabel()) for e in data]
     print(dataset)
     inputSize = len(dataset[0][0])
     hyperParams = HyperParams(STEP_SIZE, REG)
 
-    model = Model(inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
-    model.train(dataset)
-    model.validate(dataset)
+    params = {"receptiveFieldSize":3 , "stride":1, "zeroPadding": None}
+    features = np.random.randn(3,3)
+    conv = ConvLayer(params, features)
+    conv.forward(np.asarray(dataset[0]))
+    # model = Model(inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
+    # model.train(dataset)
+    # model.validate(dataset)
 
 
 

@@ -1,4 +1,4 @@
-import numpy as np
+from src.utils.im2col import *
 
 
 class HiddenLayer(object):
@@ -8,6 +8,7 @@ class HiddenLayer(object):
     activation class
     hyperparams bundle of nn parameters and stuff
     '''
+
     def __init__(self, inputSize, outputSize, activation, hyperparams):
         self.__inputSize = inputSize
         self.__outputSize = outputSize
@@ -34,3 +35,29 @@ class HiddenLayer(object):
 
         newGradient = np.dot(gradients, np.transpose(self.__weights))
         return self.__activation.derivative(X, newGradient)
+
+
+class ConvLayer(object):
+    '''
+    params is a map containing convs configuration:
+        receptiveFieldSize is the size of the feature
+        stride is the 'step' of the conv
+        zeroPadding is the size of extending around the model
+        features is an array of feature matrices
+    '''
+    def __init__(self, params, features):
+        self.__receptiveFieldSize = params['receptiveFieldSize']
+        self.__stride = params['stride']
+        self.__zeroPadding = params['zeroPadding']
+        if (self.__zeroPadding == None):
+            self.__zeroPadding = (int) ((self.__receptiveFieldSize - 1) / 2)
+
+
+
+    '''
+        in this case X is an array of pixel matrices
+    '''
+    def forward(self, X):
+        XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding, self.__stride)
+        return XCol
+

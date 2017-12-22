@@ -4,7 +4,7 @@ from os import listdir
 from os.path import isfile
 
 ROOT = '../dataset/processed/'
-PROCESSED_RESIZE = 128 , 128
+PROCESSED_RESIZE = 100 , 100
 
 ''' initializing dataset from root folder
     the label is given by the directory name
