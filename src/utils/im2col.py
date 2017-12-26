@@ -21,13 +21,29 @@ import numpy as np
 
 def im2col(x, filterH, filterW, padding=1, stride=1):
     inputSize, height, width = x.shape
-    # tuples of axis in the pixel maps to get padded
+
+    # we have no color channels
+    channelSize = 0
+
     if (height + 2 * padding - filterH) % stride == 0 or (width + 2 * padding - filterW) % stride == 0:
         raise ValueError(" The combination of filter height, width, padding and stride do not match ")
 
+    # tuples of axis in the pixel maps to get padded
     pad = (0, 0), (padding, padding), (padding, padding)
 
     paddedX = np.pad(x, pad, mode='constant')
 
-    out_height = (height + 2 * padding - filterH) / stride + 1
-    out_width = (width + 2 * padding - filterW) / stride + 1
+    out_height = int((height + 2 * padding - filterH) / stride + 1)
+    out_width = int((width + 2 * padding - filterW) / stride + 1)
+
+    i0 = np.repeat(np.arange(filterH), filterW)
+    i0 = np.tile(i0, C)
+    i1 = stride * np.repeat(np.arange(out_height), out_width)
+    j0 = np.tile(np.arange(filterW), filterH * channelSize)
+    j1 = stride * np.tile(np.arange(out_width), out_height)
+    i = i0.reshape(-1, 1) + i1.reshape(1, -1)
+    j = j0.reshape(-1, 1) + j1.reshape(1, -1)
+
+    k = np.repeat(np.arange(channelSize), filterH * filterW).reshape(-1, 1)
+
+    return (k, i, j)

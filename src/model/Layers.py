@@ -58,6 +58,6 @@ class ConvLayer(object):
         in this case X is an array of pixel matrices
     '''
     def forward(self, X):
-        XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding, self.__stride)
+        XCol = im2col(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding, self.__stride)
         return XCol
 
