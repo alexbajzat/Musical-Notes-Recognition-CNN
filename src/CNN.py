@@ -53,7 +53,7 @@ def doTheStuff():
     # randomize data for better distribution
 
     random.shuffle(data)
-    dataset = [np.asarray(e.getData().getdata()) for e in data], [int(e.getLabel()) for e in data]
+    dataset = [e.getData() for e in data], [int(e.getLabel()) for e in data]
     print(dataset)
     inputSize = len(dataset[0][0])
     hyperParams = HyperParams(STEP_SIZE, REG)
