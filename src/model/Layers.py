@@ -1,4 +1,4 @@
-from src.utils.im2col import *
+from src.utils.preprocessing import *
 
 
 class HiddenLayer(object):

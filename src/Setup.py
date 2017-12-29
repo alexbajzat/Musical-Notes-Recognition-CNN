@@ -4,7 +4,8 @@ from os import listdir
 from os.path import isfile
 import numpy as np
 
-ROOT = '../dataset/processed/'
+DATASET_ROOT = '../dataset/processed/'
+REAL_SET_ROOT = '../images'
 PROCESSED_RESIZE = 100 , 100
 
 ''' initializing dataset from root folder
@@ -13,9 +14,9 @@ PROCESSED_RESIZE = 100 , 100
 '''
 def initDataset():
     labeledData = []
-    for folder in listdir(ROOT):
-        for filename in listdir(ROOT + folder):
-            url = ROOT + folder + "/" + filename
+    for folder in listdir(DATASET_ROOT):
+        for filename in listdir(DATASET_ROOT + folder):
+            url = DATASET_ROOT + folder + "/" + filename
             print(url)
             if(isfile(url)):
                 print('loading file: ' + url)
@@ -24,5 +25,23 @@ def initDataset():
                 img = np.asarray(img.getdata()).reshape(img.size[0], img.size[1])
                 labeledData.append(LabeledModel(img, folder))
     return labeledData
+
+def loadImages():
+        images = []
+        for filename in listdir(DATASET_ROOT):
+            url = DATASET_ROOT + "/" + filename
+            print(url)
+            if (isfile(url)):
+                print('loading file: ' + url)
+                img = Image.open(url).convert('L')
+                img = img.resize(PROCESSED_RESIZE, Image.ANTIALIAS)
+                img = np.asarray(img.getdata()).reshape(img.size[0], img.size[1])
+                images.append(img)
+        return images
+
+
+
+
+
 
 

@@ -19,19 +19,14 @@ import numpy as np
 '''
 
 
-def im2col(x, filterH, filterW, padding=1, stride=1):
-    inputSize, height, width = x.shape
+def im2col_indices(x, filterH, filterW, padding=1, stride=1):
+    inputSize, height, width = x
 
     # we have no color channels
-    channelSize = 0
+    channelSize = 1
 
     if (height + 2 * padding - filterH) % stride != 0 or (width + 2 * padding - filterW) % stride != 0:
         raise ValueError(" The combination of filter height, width, padding and stride do not match ")
-
-    # tuples of axis in the pixel maps to get padded
-    pad = (0, 0), (padding, padding), (padding, padding)
-
-    paddedX = np.pad(x, pad, mode='constant')
 
     out_height = int((height + 2 * padding - filterH) / stride + 1)
     out_width = int((width + 2 * padding - filterW) / stride + 1)
@@ -47,3 +42,18 @@ def im2col(x, filterH, filterW, padding=1, stride=1):
     k = np.repeat(np.arange(channelSize), filterH * filterW).reshape(-1, 1)
 
     return (k, i, j)
+
+
+def im2col(x, filterH, filterW, padding=1, stride=1):
+  """ An implementation of im2col based on some fancy indexing """
+  # Zero-pad the input
+  p = padding
+  x_padded = np.pad(x, ((0, 0), (p, p), (p, p)), mode='constant')
+
+  k, i, j = im2col_indices(x.shape, filterH, filterW, padding,
+                           stride)
+
+  cols = x_padded[:, i, j]
+  C = x.shape[0]
+  cols = cols.transpose(1,2, 0).reshape(filterH * filterW * C, -1)
+  return cols
