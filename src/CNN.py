@@ -1,13 +1,13 @@
 import numpy as np
 import random
-from src.Setup import initDataset
+from src.Setup import initDataset, loadImages
 from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.model.Layers import HiddenLayer, ConvLayer
 
 '''
-    hyperparamenters
+    hyperparamenters values
 '''
 STEP_SIZE = 1e-07
 REG = 1e-3
@@ -15,8 +15,8 @@ REG = 1e-3
 
 class Model(object):
     def __init__(self, inputSize, classifier, hyperParams):
-        self.__firstHiddenLayer = HiddenLayer(inputSize, 100, NonActivation(), hyperParams)
-        self.__secondHiddenLayer = HiddenLayer(100, 2, ReLUActivation(), hyperParams)
+        self.__firstHiddenLayer = HiddenLayer(inputSize, 1000 , ReLUActivation(), hyperParams)
+        self.__secondHiddenLayer = HiddenLayer(1000, 7, NonActivation(), hyperParams)
         self.__classifier = classifier
         self.__hyperParams = hyperParams
 
@@ -28,6 +28,7 @@ class Model(object):
 
             f = self.__firstHiddenLayer.forward(data)
             s = self.__secondHiddenLayer.forward(f)
+
             scores = self.__classifier.compute(s, labels)
 
             sGrads = self.__secondHiddenLayer.backpropagate(f, scores)
@@ -42,44 +43,35 @@ class Model(object):
         print('training accuracy:', (np.mean(predictedClasses == labels)))
 
 
-'''
-    translate the pixel matrix to vector for the input of the model, numpy is magic
-'''
-
-
-def flattenMatrix(data):
-    return np.array(data).reshape(-1)
-
-
 def doTheStuff():
     data = initDataset()
     datasetSize = len(data)
     inputSize = len(data[0].getData())
 
     # randomize data for better distribution
-
     random.shuffle(data)
-    datasetValues = np.empty((datasetSize, inputSize, inputSize))
-    datasetLabels = np.empty((datasetSize, inputSize, 1))
+
+    # initialize data
+    datasetValues = np.empty((datasetSize, inputSize * inputSize), dtype=int)
+    datasetLabels = np.empty((datasetSize, 1), dtype=int)
     position = 0
     for value in data:
-        datasetValues[position] = value.getData()
+        datasetValues[position] = value.getData().reshape(-1)
         datasetLabels[position] = value.getLabel()
-        position+=1
+        position += 1
 
     dataset = datasetValues, datasetLabels
-
-    print(dataset)
     hyperParams = HyperParams(STEP_SIZE, REG)
 
-    params = {"receptiveFieldSize": 3, "stride": 1, "zeroPadding": None}
-    features = np.random.randn(3, 3)
-    conv = ConvLayer(params, features)
-    flattened =  conv.forward(dataset[0])
-    print('')
-    # model = Model(inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
-    # model.train(dataset)
-    # model.validate(dataset)
+    model = Model(inputSize * inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
+    model.train(dataset)
+    model.validate(dataset)
+
+
+def predict():
+    images = loadImages()
+    for image in images:
+        image[1].show(command='fim')
 
 
 doTheStuff()

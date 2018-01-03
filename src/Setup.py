@@ -35,8 +35,8 @@ def loadImages():
                 print('loading file: ' + url)
                 img = Image.open(url).convert('L')
                 img = img.resize(PROCESSED_RESIZE, Image.ANTIALIAS)
-                img = np.asarray(img.getdata()).reshape(img.size[0], img.size[1])
-                images.append(img)
+                parsed = np.asarray(img.getdata()).reshape(img.size[0], img.size[1])
+                images.append(parsed, img)
         return images
 
 
