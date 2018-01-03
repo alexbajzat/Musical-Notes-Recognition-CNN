@@ -50,13 +50,12 @@ class ConvLayer(object):
         self.__receptiveFieldSize = params['receptiveFieldSize']
         self.__stride = params['stride']
         self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
+        self.__featureNumber = params['f_number']
 
-        self.__features = features
-
-        if (self.__features == None):
-            self.__features = np.empty((1, self.__receptiveFieldSize * self.__receptiveFieldSize))
-            np.insert(self.__features, 1, np.random.randn(self.__receptiveFieldSize * self.__receptiveFieldSize))
-            np.insert(self.__features, 2, np.random.randn(self.__receptiveFieldSize * self.__receptiveFieldSize))
+        size = self.__receptiveFieldSize * self.__receptiveFieldSize
+        self.__features = np.empty((1, size))
+        self.__biases = np.zeros((size, 1), dtype=int)
+        np.insert(self.__features, 1, np.random.randn(size))
 
     '''
         X is an array of pixel matrices
@@ -65,9 +64,45 @@ class ConvLayer(object):
 
     def forward(self, X):
         XCol = im2col(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding, self.__stride)
+        # TODO add biases
         weighted = np.dot(self.__features, XCol)
         reshaped = weighted.reshape((len(self.__features), X.shape[1], X.shape[2], X.shape[0]))
+
+        self.__cache = X, XCol
         return reshaped.transpose(3, 0, 1, 2)
 
-    def backprop(self, X, gradients):
+    '''
+        gradients is of size (input_n X filter_n X filter_h X filter_w)  
+    '''
+
+    def backprop(self, gradients):
+        X, XCol = self.__cache
+        # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n) and reshape to (filter_N X filter_h * filter_w & input_n)
+        gradientsReshaped = gradients.transpose(1, 2, 3, 0).reshape(self.__featureNumber, -1)
+        dWeights = np.dot(gradientsReshaped, np.transpose(XCol))
+        self.__features += dWeights
         return None
+
+
+'''
+    layer class which just passes the input thru an activation
+'''
+
+
+class PoolLayer(object):
+    def __init__(self, size=2, stride=2, type='MAX'):
+        self.__size = size
+        self.__stride = stride
+        self.__type = type
+
+    def forward(self, X):
+        return None
+
+
+class ActivationLayer(object):
+
+    def __init__(self, activation):
+        self.__activation = activation
+
+    def forward(self, X):
+        return self.__activation.apply(X)

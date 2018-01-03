@@ -63,10 +63,11 @@ def doTheStuff():
     dataset = datasetValues, datasetLabels
     hyperParams = HyperParams(STEP_SIZE, REG)
 
-    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None}
+    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 1}
     conv = ConvLayer(params, None)
 
-    conv.forward(dataset[0])
+    forward = conv.forward(dataset[0])
+    backward = conv.backprop(forward)
 
     # model getting trained
     model = Model(inputSize * inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
