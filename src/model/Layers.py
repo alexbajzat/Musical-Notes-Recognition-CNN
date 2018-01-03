@@ -45,19 +45,29 @@ class ConvLayer(object):
         zeroPadding is the size of extending around the model
         features is an array of feature matrices
     '''
+
     def __init__(self, params, features):
         self.__receptiveFieldSize = params['receptiveFieldSize']
         self.__stride = params['stride']
-        self.__zeroPadding = params['zeroPadding']
-        if (self.__zeroPadding == None):
-            self.__zeroPadding = (int) ((self.__receptiveFieldSize - 1) / 2)
+        self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
 
+        self.__features = features
 
+        if (self.__features == None):
+            self.__features = np.empty((1, self.__receptiveFieldSize * self.__receptiveFieldSize))
+            np.insert(self.__features, 1, np.random.randn(self.__receptiveFieldSize * self.__receptiveFieldSize))
+            np.insert(self.__features, 2, np.random.randn(self.__receptiveFieldSize * self.__receptiveFieldSize))
 
     '''
-        in this case X is an array of pixel matrices
+        X is an array of pixel matrices
+        returns the features map
     '''
+
     def forward(self, X):
         XCol = im2col(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding, self.__stride)
-        return XCol
+        weighted = np.dot(self.__features, XCol)
+        reshaped = weighted.reshape((len(self.__features), X.shape[1], X.shape[2], X.shape[0]))
+        return reshaped.transpose(3, 0, 1, 2)
 
+    def backprop(self, X, gradients):
+        return None

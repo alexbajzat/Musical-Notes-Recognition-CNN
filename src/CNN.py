@@ -15,7 +15,7 @@ REG = 1e-3
 
 class Model(object):
     def __init__(self, inputSize, classifier, hyperParams):
-        self.__firstHiddenLayer = HiddenLayer(inputSize, 1000 , ReLUActivation(), hyperParams)
+        self.__firstHiddenLayer = HiddenLayer(inputSize, 1000, ReLUActivation(), hyperParams)
         self.__secondHiddenLayer = HiddenLayer(1000, 7, NonActivation(), hyperParams)
         self.__classifier = classifier
         self.__hyperParams = hyperParams
@@ -52,17 +52,23 @@ def doTheStuff():
     random.shuffle(data)
 
     # initialize data
-    datasetValues = np.empty((datasetSize, inputSize * inputSize), dtype=int)
+    datasetValues = np.empty((datasetSize, inputSize, inputSize), dtype=int)
     datasetLabels = np.empty((datasetSize, 1), dtype=int)
     position = 0
     for value in data:
-        datasetValues[position] = value.getData().reshape(-1)
+        datasetValues[position] = value.getData()
         datasetLabels[position] = value.getLabel()
         position += 1
 
     dataset = datasetValues, datasetLabels
     hyperParams = HyperParams(STEP_SIZE, REG)
 
+    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None}
+    conv = ConvLayer(params, None)
+
+    conv.forward(dataset[0])
+
+    # model getting trained
     model = Model(inputSize * inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
     model.train(dataset)
     model.validate(dataset)

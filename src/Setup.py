@@ -6,7 +6,7 @@ import numpy as np
 
 DATASET_ROOT = '../dataset/processed/'
 REAL_SET_ROOT = '../images'
-PROCESSED_RESIZE = 100 , 100
+PROCESSED_RESIZE = 64 , 64
 
 ''' initializing dataset from root folder
     the label is given by the directory name

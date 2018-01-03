@@ -55,5 +55,5 @@ def im2col(x, filterH, filterW, padding=1, stride=1):
 
   cols = x_padded[:, i, j]
   C = x.shape[0]
-  cols = cols.transpose(1,2, 0).reshape(filterH * filterW * C, -1)
+  cols = cols.transpose(1,2, 0).reshape(filterH * filterW, -1)
   return cols
