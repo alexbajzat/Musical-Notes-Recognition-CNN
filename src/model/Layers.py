@@ -79,8 +79,15 @@ class ConvLayer(object):
         X, XCol = self.__cache
         # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n) and reshape to (filter_N X filter_h * filter_w & input_n)
         gradientsReshaped = gradients.transpose(1, 2, 3, 0).reshape(self.__featureNumber, -1)
-        dWeights = np.dot(gradientsReshaped, np.transpose(XCol))
-        self.__features += dWeights
+
+        # calculate gradients on feature
+        dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
+        self.__features += dFeatures
+
+        # calculate gradients on input
+        dXCol = np.dot(np.transpose(self.__features), gradientsReshaped)
+        dX = col2im_indices(dXCol, X.shape, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
+                            self.__stride)
         return None
 
 
