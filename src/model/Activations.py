@@ -17,6 +17,7 @@ class ReLUActivation(object):
         gradients[X <= 0] = 0
         return gradients
 
+
 '''
     Non activation i.e. value is invariant
 '''

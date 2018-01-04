@@ -1,22 +1,15 @@
 import numpy as np
-import random
-from src.Setup import initDataset, loadImages, Constants
 from src.model.Activations import NonActivation, ReLUActivation
-from src.model.Classifiers import SoftMax
-from src.model.HyperParams import HyperParams
-from src.model.Layers import HiddenLayer, ConvLayer
-
-'''
-    hyperparamenters values
-'''
-STEP_SIZE = 1e-07
-REG = 1e-3
+from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer
 
 
 class Model(object):
-    def __init__(self, inputSize, classifier, hyperParams):
-        self.__firstHiddenLayer = HiddenLayer(inputSize, 1000, ReLUActivation(), hyperParams)
-        self.__secondHiddenLayer = HiddenLayer(1000, 7, NonActivation(), hyperParams)
+    def __init__(self, inputSize, classifier, hyperParams, convParams):
+        self.__firstConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams)
+        self.__poolingLayer = PoolLayer()
+        self.__flattenLayer = FlattenLayer()
+        self.__firstHiddenLayer = HiddenLayer(32 * 32 * 5, 100, ReLUActivation(), hyperParams)
+        self.__secondHiddenLayer = HiddenLayer(100, 7, NonActivation(), hyperParams)
         self.__classifier = classifier
         self.__hyperParams = hyperParams
 
@@ -26,59 +19,41 @@ class Model(object):
         for iteration in range(100):
             print("iteration: ", iteration, '\n')
 
-            f = self.__firstHiddenLayer.forward(data)
+            # conv stuff
+            fConvForward = self.__firstConvLayer.forward(data)
+            fPoolForward = self.__poolingLayer.forward(fConvForward)
+            flatten = self.__flattenLayer.forward(fPoolForward)
+
+            # Fully connected start
+            f = self.__firstHiddenLayer.forward(flatten)
             s = self.__secondHiddenLayer.forward(f)
 
+            # gradients on score
             scores = self.__classifier.compute(s, labels)
 
             sGrads = self.__secondHiddenLayer.backpropagate(f, scores)
-            self.__firstHiddenLayer.backpropagate(data, sGrads)
+            firstHiddenGrads = self.__firstHiddenLayer.backpropagate(flatten, sGrads)
+
+            # backprop into flatten layer
+            # from here we backprop to convs
+            unflatten = self.__flattenLayer.backprop(firstHiddenGrads)
+
+            fPoolBack = self.__poolingLayer.backprop(unflatten)
+            self.__firstConvLayer.backprop(fPoolBack)
+
+            # done propagating to convs
 
     def validate(self, dataset):
         data = dataset[0]
         labels = dataset[1]
-        f = self.__firstHiddenLayer.forward(data)
+
+        # conv
+        fConvForward = self.__firstConvLayer.forward(data)  
+        fPoolForward = self.__poolingLayer.forward(fConvForward)
+        flatten = self.__flattenLayer.forward(fPoolForward)
+
+        # Fully connected start
+        f = self.__firstHiddenLayer.forward(flatten)
         s = self.__secondHiddenLayer.forward(f)
         predictedClasses = np.argmax(s, axis=1)
         print('training accuracy:', (np.mean(predictedClasses == labels)))
-
-
-def doTheStuff():
-    data = initDataset()
-    datasetSize = len(data)
-    inputSize = data[0].getData().shape[1]
-
-    # randomize data for better distribution
-    random.shuffle(data)
-
-    # initialize data
-    datasetValues = np.empty((datasetSize, Constants.CHANNEL_SIZE, inputSize, inputSize), dtype=int)
-    datasetLabels = np.empty((datasetSize, 1), dtype=int)
-    position = 0
-    for value in data:
-        datasetValues[position] = value.getData()
-        datasetLabels[position] = value.getLabel()
-        position += 1
-
-    dataset = datasetValues, datasetLabels
-    hyperParams = HyperParams(STEP_SIZE, REG)
-
-    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 1}
-    conv = ConvLayer(params, None)
-
-    forward = conv.forward(dataset[0])
-    backward = conv.backprop(forward)
-
-    # model getting trained
-    model = Model(inputSize * inputSize, SoftMax(datasetSize, hyperParams), hyperParams)
-    model.train(dataset)
-    model.validate(dataset)
-
-
-def predict():
-    images = loadImages()
-    for image in images:
-        image[1].show(command='fim')
-
-
-doTheStuff()
