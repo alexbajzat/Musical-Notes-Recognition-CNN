@@ -1,6 +1,6 @@
 import numpy as np
 import random
-from src.Setup import initDataset, loadImages
+from src.Setup import initDataset, loadImages, Constants
 from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
@@ -46,13 +46,13 @@ class Model(object):
 def doTheStuff():
     data = initDataset()
     datasetSize = len(data)
-    inputSize = len(data[0].getData())
+    inputSize = data[0].getData().shape[1]
 
     # randomize data for better distribution
     random.shuffle(data)
 
     # initialize data
-    datasetValues = np.empty((datasetSize, inputSize, inputSize), dtype=int)
+    datasetValues = np.empty((datasetSize, Constants.CHANNEL_SIZE, inputSize, inputSize), dtype=int)
     datasetLabels = np.empty((datasetSize, 1), dtype=int)
     position = 0
     for value in data:

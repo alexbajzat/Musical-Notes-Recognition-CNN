@@ -55,6 +55,9 @@ class ConvLayer(object):
         size = self.__receptiveFieldSize * self.__receptiveFieldSize
         self.__features = np.empty((1, size))
         self.__biases = np.zeros((size, 1), dtype=int)
+
+        # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
+        # and flattened `em to 1 X size * size , further needs
         np.insert(self.__features, 1, np.random.randn(size))
 
     '''
@@ -63,13 +66,17 @@ class ConvLayer(object):
     '''
 
     def forward(self, X):
-        XCol = im2col(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding, self.__stride)
+        XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
+                              self.__stride)
         # TODO add biases
         weighted = np.dot(self.__features, XCol)
-        reshaped = weighted.reshape((len(self.__features), X.shape[1], X.shape[2], X.shape[0]))
+
+        # reshape is done assuming that after the conv, the feature maps keep the dims of the input
+        # using magic padding
+        reshaped = weighted.reshape((X.shape[0], self.__featureNumber, X.shape[2], X.shape[3]))
 
         self.__cache = X, XCol
-        return reshaped.transpose(3, 0, 1, 2)
+        return reshaped
 
     '''
         gradients is of size (input_n X filter_n X filter_h X filter_w)  
@@ -88,7 +95,8 @@ class ConvLayer(object):
         dXCol = np.dot(np.transpose(self.__features), gradientsReshaped)
         dX = col2im_indices(dXCol, X.shape, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                             self.__stride)
-        return None
+
+        return dX
 
 
 '''
