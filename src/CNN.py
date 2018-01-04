@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer
 
@@ -8,6 +9,7 @@ class Model(object):
         self.__firstConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams)
         self.__poolingLayer = PoolLayer()
         self.__flattenLayer = FlattenLayer()
+        # todo remove hardcoded stuff
         self.__firstHiddenLayer = HiddenLayer(32 * 32 * 5, 100, ReLUActivation(), hyperParams)
         self.__secondHiddenLayer = HiddenLayer(100, 7, NonActivation(), hyperParams)
         self.__classifier = classifier
@@ -42,13 +44,16 @@ class Model(object):
             self.__firstConvLayer.backprop(fPoolBack)
 
             # done propagating to convs
+        for feature in self.__firstConvLayer.getFeatures():
+            parsed = feature.reshape(3, 3)
+            Image.fromarray(parsed, 'L').resize((100, 100)).save('../features/' + str(id(parsed)) + '.png')
 
     def validate(self, dataset):
         data = dataset[0]
         labels = dataset[1]
 
         # conv
-        fConvForward = self.__firstConvLayer.forward(data)  
+        fConvForward = self.__firstConvLayer.forward(data)
         fPoolForward = self.__poolingLayer.forward(fConvForward)
         flatten = self.__flattenLayer.forward(fPoolForward)
 

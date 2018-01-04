@@ -1,4 +1,5 @@
 import numpy as np
+from PIL import Image
 
 
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):

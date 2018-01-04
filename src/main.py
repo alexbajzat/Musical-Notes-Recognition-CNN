@@ -6,6 +6,7 @@ from src.model.HyperParams import HyperParams
 from src.CNN import Model
 
 STEP_SIZE = 1e-07
+FEATURE_STEP_SIZE = 1e-03
 REG = 1e-3
 
 
@@ -27,7 +28,7 @@ def doTheStuff():
         position += 1
 
     dataset = datasetValues, datasetLabels
-    hyperParams = HyperParams(STEP_SIZE, REG)
+    hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5}
 

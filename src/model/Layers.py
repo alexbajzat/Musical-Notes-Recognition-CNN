@@ -1,4 +1,4 @@
-from src.utils.preprocessing import *
+from src.utils.processing import *
 
 
 class HiddenLayer(object):
@@ -91,7 +91,7 @@ class ConvLayer(object):
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
-        self.__features += - self.__hyperparams.stepSize * dFeatures
+        self.__features += - self.__hyperparams.featureStepSize * dFeatures
 
         # calculate gradients on input
         dXCol = np.dot(np.transpose(self.__features), gradientsReshaped)
@@ -99,6 +99,9 @@ class ConvLayer(object):
                             self.__stride)
 
         return dX
+
+    def getFeatures(self):
+        return self.__features
 
 
 '''
