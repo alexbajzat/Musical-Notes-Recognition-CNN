@@ -44,6 +44,8 @@ class Model(object):
             self.__firstConvLayer.backprop(fPoolBack)
 
             # done propagating to convs
+
+        # save features as pngs
         for feature in self.__firstConvLayer.getFeatures():
             parsed = feature.reshape(3, 3)
             Image.fromarray(parsed, 'L').resize((100, 100)).save('../features/' + str(id(parsed)) + '.png')

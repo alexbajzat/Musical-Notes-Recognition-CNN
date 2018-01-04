@@ -6,7 +6,7 @@ from src.model.HyperParams import HyperParams
 from src.CNN import Model
 
 STEP_SIZE = 1e-07
-FEATURE_STEP_SIZE = 1e-03
+FEATURE_STEP_SIZE = 1e-07
 REG = 1e-3
 
 
