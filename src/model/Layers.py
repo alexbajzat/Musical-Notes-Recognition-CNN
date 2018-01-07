@@ -36,6 +36,9 @@ class HiddenLayer(object):
         newGradient = np.dot(gradients, np.transpose(self.__weights))
         return self.__activation.derivative(X, newGradient)
 
+    def getWeights(self):
+        return self.__weights
+
 
 class ConvLayer(object):
     '''

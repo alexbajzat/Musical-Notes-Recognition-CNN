@@ -31,7 +31,8 @@ class Model(object):
             s = self.__secondHiddenLayer.forward(f)
 
             # gradients on score
-            scores = self.__classifier.compute(s, labels)
+            scores = self.__classifier.compute(s, labels, (
+            self.__firstHiddenLayer.getWeights(), self.__secondHiddenLayer.getWeights()))
 
             sGrads = self.__secondHiddenLayer.backpropagate(f, scores)
             firstHiddenGrads = self.__firstHiddenLayer.backpropagate(flatten, sGrads)

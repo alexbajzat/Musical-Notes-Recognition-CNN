@@ -9,7 +9,7 @@ class SoftMax(object):
     # calculates the prediction
     # returns the gradient on scores
     # todo add regularization
-    def compute(self, X, labels):
+    def compute(self, X, labels, weights):
         # we want to calculate loss using cross-entropy
         # calculate the probabilities of class
         exponentiatedScores = np.exp(X)
@@ -18,7 +18,13 @@ class SoftMax(object):
         # cross-entropy
         correct = - np.log(probabilites[range(self.__datasetSize), np.asarray(labels)])
         dataLoss = np.sum(correct) / self.__datasetSize
-        print('loss: ', dataLoss)
+        regularizationLoss = 0
+        for weight in weights:
+            regularizationLoss += 0.5 * self.__hyperParams.regularization * np.sum(weight * weight)
+
+        # total loss data loss + regularization loss
+        loss = dataLoss + regularizationLoss
+        print('loss: ', loss)
 
         # calculate the derivative
         derivativeProbs = probabilites
