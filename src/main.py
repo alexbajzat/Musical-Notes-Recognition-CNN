@@ -36,6 +36,12 @@ def doTheStuff():
     model = Model(inputSize * inputSize, SoftMax(datasetSize, hyperParams), hyperParams, params)
     model.train(dataset)
     model.validate(dataset)
+    return model
 
+def play():
+    model = doTheStuff()
+    while(True):
+        input('Press anything to predict')
+        print('predicting... ')
 
 doTheStuff()

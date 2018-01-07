@@ -65,3 +65,14 @@ class Model(object):
         s = self.__secondHiddenLayer.forward(f)
         predictedClasses = np.argmax(s, axis=1)
         print('training accuracy:', (np.mean(predictedClasses == labels)))
+
+    def predict(self, data):
+        # conv stuff
+        fConvForward = self.__firstConvLayer.forward(data)
+        fPoolForward = self.__poolingLayer.forward(fConvForward)
+        flatten = self.__flattenLayer.forward(fPoolForward)
+
+        # Fully connected start
+        f = self.__firstHiddenLayer.forward(flatten)
+        s = self.__secondHiddenLayer.forward(f)
+
