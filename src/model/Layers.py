@@ -1,4 +1,5 @@
 from src.utils.processing import *
+from src.model.Activations import ReLUActivation
 
 
 class HiddenLayer(object):
@@ -56,7 +57,6 @@ class ConvLayer(object):
         self.__featureNumber = params['f_number']
 
         size = self.__receptiveFieldSize * self.__receptiveFieldSize
-        self.__biases = np.zeros((size, 1), dtype=int)
 
         # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
         # and flattened `em to 1 X size * size , further needs
@@ -72,7 +72,6 @@ class ConvLayer(object):
     def forward(self, X):
         XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                               self.__stride)
-        # TODO add biases
         weighted = np.dot(self.__features, XCol)
 
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
@@ -164,9 +163,14 @@ class PoolLayer(object):
 
 
 class REluActivationLayer(object):
+    def __init__(self):
+        self.__activation = ReLUActivation()
 
     def forward(self, X):
-        return np.clip(X, a_min=0, a_max=None)
+        return self.__activation.apply(X)
+
+    def backward(self, X, gradients):
+        return self.__activation.derivative(X, gradients)
 
 
 class FlattenLayer(object):
