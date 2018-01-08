@@ -18,8 +18,8 @@ class HiddenLayer(object):
 
         # initialize weights and biases
         # todo weights should be initialized using square root / input size
-        self.__weights = 0.01 * np.random.randn(inputSize, outputSize)
-        self.__biases = np.zeros((1, outputSize))
+        self.__weights = np.random.randn(inputSize, outputSize) * 0.01
+        self.__biases = np.zeros((1, outputSize)) + 0.01
 
     def forward(self, X):
         result = np.dot(X, self.__weights) + self.__biases

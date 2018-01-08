@@ -22,7 +22,7 @@ class Model(object):
         labels = dataset[1]
         start = 0
         endBatch = self.__batchSize
-        nOfIterations = 50
+        nOfIterations = 80
         while (True):
             batchedData = data[start:endBatch]
             batchedLabels = labels[start:endBatch]
@@ -82,7 +82,8 @@ class Model(object):
         # conv
         fConvForward = self.__firstConvLayer.forward(data)
         fPoolForward = self.__fPoolingLayer.forward(fConvForward)
-        flatten = self.__flattenLayer.forward(fPoolForward)
+        sPoolForward = self.__sPoolingLayer.forward(fPoolForward)
+        flatten = self.__flattenLayer.forward(sPoolForward)
 
         # Fully connected start
         f = self.__firstHiddenLayer.forward(flatten)

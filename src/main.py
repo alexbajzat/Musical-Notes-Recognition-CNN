@@ -8,16 +8,17 @@ from src.CNN import Model
 STEP_SIZE = 1e-7
 FEATURE_STEP_SIZE = 1e-7
 REG = 1e-3
-BATCH_SIZE = 150
+BATCH_SIZE = 50
 
 
 def doTheStuff():
     data = initDataset()
-    datasetSize = len(data)
+
     inputSize = data[0].getData().shape[1]
 
     # randomize data for better distribution
     random.shuffle(data)
+    datasetSize = len(data)
 
     # initialize data
     datasetValues = np.empty((datasetSize, Constants.CHANNEL_SIZE, inputSize, inputSize), dtype=int)
@@ -28,8 +29,8 @@ def doTheStuff():
         datasetLabels[position] = value.getLabel()
         position += 1
 
-    trainingDataset = datasetValues[0:450], datasetLabels[0:450]
-    validatingDataset = datasetValues[450:], datasetLabels[450:]
+    trainingDataset = datasetValues[0:400], datasetLabels[0:400]
+    validatingDataset = datasetValues[400:], datasetLabels[400:]
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5}
