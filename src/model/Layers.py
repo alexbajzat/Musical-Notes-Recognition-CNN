@@ -40,6 +40,9 @@ class HiddenLayer(object):
     def getWeights(self):
         return self.__weights
 
+    def setStepSize(self, newStep):
+        self.__hyperparams.stepSize = newStep
+
 
 class ConvLayer(object):
     '''
@@ -93,7 +96,7 @@ class ConvLayer(object):
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
-        self.__features += - self.__hyperparams.featureStepSize * dFeatures
+        self.__features += -self.__hyperparams.featureStepSize * dFeatures
 
         # calculate gradients on input
         dXCol = np.dot(np.transpose(self.__features), gradientsReshaped)

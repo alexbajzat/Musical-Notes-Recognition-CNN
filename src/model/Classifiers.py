@@ -24,7 +24,7 @@ class SoftMax(object):
 
         # total loss data loss + regularization loss
         loss = dataLoss + regularizationLoss
-        print('loss: ', loss)
+        print('loss: ', loss, '\n')
 
         # calculate the derivative
         derivativeProbs = probabilites
