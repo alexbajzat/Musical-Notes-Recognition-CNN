@@ -6,8 +6,8 @@ from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.CNN import Model
 
-STEP_SIZE = 1e-6
-FEATURE_STEP_SIZE = 1e-6
+STEP_SIZE = 1e-4
+FEATURE_STEP_SIZE = 1e-5
 REG = 1e-3
 BATCH_SIZE = 100
 
@@ -29,8 +29,8 @@ def doTheStuff(data):
         datasetLabels[position] = value.getLabel()
         position += 1
 
-    trainingDataset = datasetValues[0:400], datasetLabels[0:400]
-    validatingDataset = datasetValues[400:], datasetLabels[400:]
+    trainingDataset = datasetValues[0:900], datasetLabels[0:900]
+    validatingDataset = datasetValues[900:], datasetLabels[900:]
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5}

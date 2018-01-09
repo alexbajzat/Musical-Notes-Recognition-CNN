@@ -89,7 +89,7 @@ class Model(object):
         f = self.__firstHiddenLayer.forward(flatten)
         s = self.__secondHiddenLayer.forward(f)
         predictedClasses = np.argmax(s, axis=1)
-        print('training accuracy:', (np.mean(predictedClasses == labels)))
+        print('training accuracy:', (np.mean(predictedClasses == np.transpose(labels))))
 
     def predict(self, data):
         # conv stuff
