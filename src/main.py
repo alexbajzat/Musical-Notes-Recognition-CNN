@@ -6,7 +6,7 @@ from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.CNN import Model
 
-STEP_SIZE = 1e-4
+STEP_SIZE = 1e-5
 FEATURE_STEP_SIZE = 1e-5
 REG = 1e-3
 BATCH_SIZE = 100
@@ -29,11 +29,11 @@ def doTheStuff(data):
         datasetLabels[position] = value.getLabel()
         position += 1
 
-    trainingDataset = datasetValues[0:900], datasetLabels[0:900]
-    validatingDataset = datasetValues[900:], datasetLabels[900:]
+    trainingDataset = datasetValues[0:400], datasetLabels[0:400]
+    validatingDataset = datasetValues[400:], datasetLabels[400:]
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
-    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5}
+    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10}
 
     # model getting trained
     model = Model(inputSize * inputSize, SoftMax(hyperParams), hyperParams, params, BATCH_SIZE)
@@ -57,4 +57,4 @@ def play():
         input('Press anything to predict')
         print('predicting... ')
 
-trainWithMnist()
+train()

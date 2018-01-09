@@ -1,17 +1,20 @@
 import numpy as np
 from PIL import Image
 from src.model.Activations import NonActivation, ReLUActivation
-from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer
+from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer, REluActivationLayer
 
 
 class Model(object):
     def __init__(self, inputSize, classifier, hyperParams, convParams, batchSize):
-        # self.__firstConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams)
-        # self.__fPoolingLayer = PoolLayer()
-        # self.__sPoolingLayer = PoolLayer()
+        self.__firstConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams)
+        self.__fPoolingLayer = PoolLayer()
+        self.__sPoolingLayer = PoolLayer()
+        self.__reluLayer = REluActivationLayer()
         self.__flattenLayer = FlattenLayer()
+        self.__entrySize = 14
+        self.__entryChannelSize = 1
         # todo remove hardcoded stuff
-        self.__firstHiddenLayer = HiddenLayer(28 * 28, 50, ReLUActivation(), hyperParams)
+        self.__firstHiddenLayer = HiddenLayer(16 * 16 * 10, 50, ReLUActivation(), hyperParams)
         self.__secondHiddenLayer = HiddenLayer(50, 10, NonActivation(), hyperParams)
         self.__classifier = classifier
         self.__hyperParams = hyperParams
@@ -33,10 +36,18 @@ class Model(object):
                 print("iteration: ", iteration)
 
                 # # conv stuff
-                # fConvForward = self.__firstConvLayer.forward(batchedData)
-                # fPoolForward = self.__fPoolingLayer.forward(fConvForward)
+                fConvForward = self.__firstConvLayer.forward(batchedData)
+                fRelu = self.__reluLayer.forward(fConvForward)
+                # some visible proof
+                if (iteration > 90):
+                    self.saveImageFeatured(fConvForward[0], 'conv')
+
+                fPoolForward = self.__fPoolingLayer.forward(fRelu)
+
+                sPoolForward = self.__sPoolingLayer.forward(fPoolForward)
+
                 # sPoolForward = self.__sPoolingLayer.forward(fPoolForward)
-                flatten = self.__flattenLayer.forward(batchedData)
+                flatten = self.__flattenLayer.forward(sPoolForward)
 
                 # Fully connected start
                 f = self.__firstHiddenLayer.forward(flatten)
@@ -51,10 +62,11 @@ class Model(object):
 
                 # backprop into flatten layer
                 # from here we backprop to convs
-                # unflatten = self.__flattenLayer.backprop(firstHiddenGrads)
-                # sPoolBack = self.__sPoolingLayer.backprop(unflatten)
-                # fPoolBack = self.__fPoolingLayer.backprop(sPoolBack)
-                # self.__firstConvLayer.backprop(fPoolBack)
+                unflatten = self.__flattenLayer.backprop(firstHiddenGrads)
+                sPoolBack = self.__sPoolingLayer.backprop(unflatten)
+                fPoolBack = self.__fPoolingLayer.backprop(sPoolBack)
+                fReluBack = self.__reluLayer.backward(fConvForward, fPoolBack)
+                self.__firstConvLayer.backprop(fPoolBack)
                 # done propagating to convs
 
             # decrease step size in time, or else it gets pretty big and overflows
@@ -71,19 +83,23 @@ class Model(object):
                 break
 
         # save features as pngs
-        # for feature in self.__firstConvLayer.getFeatures():
-        #     parsed = feature.reshape(3, 3)
-        #     Image.fromarray(parsed, 'L').resize((100, 100)).save('../features/' + str(id(parsed)) + '.png')
+        for feature in self.__firstConvLayer.getFeatures():
+            parsed = feature.reshape(3, 3)
+            Image.fromarray(parsed, 'L').resize((100, 100)).save('../features/' + str(id(parsed)) + '.png')
+
+    def saveImageFeatured(self, featured, opType):
+        for img in featured:
+            Image.fromarray(img, 'L').resize((100, 100)).save('../features/' + opType + "-" + str(id(img)) + '.png')
 
     def validate(self, dataset):
         data = dataset[0]
         labels = dataset[1]
 
         # conv
-        # fConvForward = self.__firstConvLayer.forward(data)
-        # fPoolForward = self.__fPoolingLayer.forward(fConvForward)
-        # sPoolForward = self.__sPoolingLayer.forward(fPoolForward)
-        flatten = self.__flattenLayer.forward(data)
+        fConvForward = self.__firstConvLayer.forward(data)
+        fPoolForward = self.__fPoolingLayer.forward(fConvForward)
+        sPoolForward = self.__sPoolingLayer.forward(fPoolForward)
+        flatten = self.__flattenLayer.forward(sPoolForward)
 
         # Fully connected start
         f = self.__firstHiddenLayer.forward(flatten)

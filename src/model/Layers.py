@@ -79,10 +79,10 @@ class ConvLayer(object):
 
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
         # using magic padding
-        reshaped = weighted.reshape((X.shape[0], self.__featureNumber, X.shape[2], X.shape[3]))
+        reshaped = weighted.reshape((self.__featureNumber, X.shape[2], X.shape[3], X.shape[0]))
 
         self.__cache = X, XCol
-        return reshaped
+        return reshaped.transpose(3, 0, 1, 2)
 
     '''
         gradients is of size (input_n X filter_n X filter_h X filter_w)  
