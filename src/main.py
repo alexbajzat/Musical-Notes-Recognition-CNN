@@ -1,18 +1,18 @@
 import numpy as np
 import random
-from src.Setup import initDataset, loadImages, Constants
+from src.data.Setup import initDataset, Constants
+from src.data.mnistdata import initMNISTDataset
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.CNN import Model
 
-STEP_SIZE = 1e-7
-FEATURE_STEP_SIZE = 1e-7
+STEP_SIZE = 1e-6
+FEATURE_STEP_SIZE = 1e-6
 REG = 1e-3
-BATCH_SIZE = 50
+BATCH_SIZE = 100
 
 
-def doTheStuff():
-    data = initDataset()
+def doTheStuff(data):
 
     inputSize = data[0].getData().shape[1]
 
@@ -36,11 +36,20 @@ def doTheStuff():
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5}
 
     # model getting trained
-    model = Model(inputSize * inputSize, SoftMax(BATCH_SIZE, hyperParams), hyperParams, params, BATCH_SIZE)
+    model = Model(inputSize * inputSize, SoftMax(hyperParams), hyperParams, params, BATCH_SIZE)
     model.train(trainingDataset)
     model.validate(validatingDataset)
     return model
 
+
+def trainWithMnist():
+    data = initMNISTDataset()
+    doTheStuff(data)
+
+def train():
+    data = initDataset()
+
+    doTheStuff(data)
 
 def play():
     model = doTheStuff()
@@ -48,5 +57,4 @@ def play():
         input('Press anything to predict')
         print('predicting... ')
 
-
-doTheStuff()
+trainWithMnist()

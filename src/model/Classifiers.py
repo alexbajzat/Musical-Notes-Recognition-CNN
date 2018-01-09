@@ -2,22 +2,24 @@ import numpy as np
 
 
 class SoftMax(object):
-    def __init__(self, datasetSize, hyperParams):
-        self.__datasetSize = datasetSize
+    def __init__(self, hyperParams):
         self.__hyperParams = hyperParams
 
     # calculates the prediction
     # returns the gradient on scores
     # todo add regularization
     def compute(self, X, labels, weights):
+        inputNumber = X.shape[0]
         # we want to calculate loss using cross-entropy
         # calculate the probabilities of class
         exponentiatedScores = np.exp(X)
+
         # normalize probabilities
         probabilites = exponentiatedScores / np.sum(exponentiatedScores, axis=1, keepdims=True)
+
         # cross-entropy
-        correct = - np.log(probabilites[range(self.__datasetSize), np.asarray(labels)])
-        dataLoss = np.sum(correct) / self.__datasetSize
+        correct = -np.log(probabilites[range(inputNumber), np.transpose(labels)])
+        dataLoss = np.sum(correct) / inputNumber
         regularizationLoss = 0
         for weight in weights:
             regularizationLoss += 0.5 * self.__hyperParams.regularization * np.sum(weight * weight)
@@ -28,7 +30,7 @@ class SoftMax(object):
 
         # calculate the derivative
         derivativeProbs = probabilites
-        derivativeProbs[range(self.__datasetSize), np.array(labels)] -= 1
-        derivativeProbs /= self.__datasetSize
+        derivativeProbs[range(inputNumber), np.transpose(labels)] -= 1
+        derivativeProbs /= inputNumber
 
         return derivativeProbs
