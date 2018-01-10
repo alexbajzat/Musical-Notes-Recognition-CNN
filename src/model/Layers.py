@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from src.utils.processing import *
 from src.model.Activations import ReLUActivation
 
@@ -22,10 +24,12 @@ class HiddenLayer(object):
         self.__biases = np.zeros((1, outputSize)) + 0.01
 
     def forward(self, X):
+        self.__cache = deepcopy(X)
         result = np.dot(X, self.__weights) + self.__biases
         return self.__activation.apply(result)
 
-    def backpropagate(self, X, gradients):
+    def backpropagate(self, gradients):
+        X = self.__cache
         deltaWeights = np.dot(np.transpose(X), gradients)
         deltaBiases = np.sum(gradients, axis=0, keepdims=True)
 
@@ -82,7 +86,7 @@ class ConvLayer(object):
         # output depth ?
         reshaped = weighted.reshape((self.__featureNumber , X.shape[2], X.shape[3], X.shape[0]))
 
-        self.__cache = X, XCol
+        self.__cache = deepcopy(X), deepcopy(XCol)
         return reshaped.transpose(3, 0, 1, 2)
 
     '''
@@ -97,7 +101,7 @@ class ConvLayer(object):
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
-        self.__features += self.__hyperparams.featureStepSize * dFeatures
+        self.__features += -self.__hyperparams.featureStepSize * dFeatures
 
         # calculate gradients on input
         dXCol = np.dot(np.transpose(self.__features), gradientsReshaped)
@@ -141,7 +145,7 @@ class PoolLayer(object):
         reshaped = resized.reshape(outHeight, outWidth, X.shape[0], X.shape[1])
 
         # save X and XCol for the backward pass
-        self.__cache = X, XCol, maxIndexes
+        self.__cache = deepcopy(X), deepcopy(XCol), deepcopy(maxIndexes)
 
         # return to normal forms
         return reshaped.transpose(2, 3, 0, 1)

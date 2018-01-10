@@ -2,7 +2,6 @@ import numpy as np
 import random
 from src.data.Setup import initDataset, Constants
 from src.data.mnistdata import initMNISTDataset
-from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.CNN import Model
 

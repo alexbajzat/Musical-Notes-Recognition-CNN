@@ -48,17 +48,17 @@ class Model(object):
                 fConvForward = self.__firstConvLayer.forward(batchedData)
 
                 # some visible proof
-                if (iteration > 2):
+                if (iteration > (2/100 * nOfIterations)):
                     saveFeatureDepth(fConvForward[0], 'conv1')
                 fRelu = self.__reluLayer.forward(fConvForward)
                 fPoolForward = self.__fPoolingLayer.forward(fRelu)
                 sConvForward = self.__secondConvLayer.forward(fPoolForward)
 
                 # some visible proof
-                if (iteration > 2):
+                if (iteration > (80/100 * nOfIterations)):
                     saveFeatureDepth(sConvForward[0], 'conv2')
-                sPoolForward = self.__sPoolingLayer.forward(sConvForward)
 
+                sPoolForward = self.__sPoolingLayer.forward(sConvForward)
                 flatten = self.__flattenLayer.forward(sPoolForward)
 
                 # Fully connected start
@@ -69,8 +69,8 @@ class Model(object):
                     self.__firstHiddenLayer.getWeights(), self.__secondHiddenLayer.getWeights()))
 
                 # backprop in fully connected
-                sGrads = self.__secondHiddenLayer.backpropagate(f, scores)
-                firstHiddenGrads = self.__firstHiddenLayer.backpropagate(flatten, sGrads)
+                sGrads = self.__secondHiddenLayer.backpropagate(scores)
+                firstHiddenGrads = self.__firstHiddenLayer.backpropagate(sGrads)
                 # backprop into flatten layer
                 # from here we backprop to convs
                 unflatten = self.__flattenLayer.backprop(firstHiddenGrads)
