@@ -3,7 +3,7 @@ from PIL import Image
 from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Classifiers import SoftMax
 from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer, REluActivationLayer
-from src.utils.processing import saveFeatureDepth
+from src.utils.processing import exportPNGs
 
 
 class Model(object):
@@ -21,8 +21,8 @@ class Model(object):
         # watch-out for the input size of the first fully net
         # /4 comes from the number of pooling layers ( they shrink 2X the data)
         self.__firstHiddenLayer = HiddenLayer(int(np.power(np.sqrt(inputSize / 4), 2) * convParams['f_number'] / 4),
-                                              50, ReLUActivation(), hyperParams)
-        self.__secondHiddenLayer = HiddenLayer(50, nOfLabels, NonActivation(), hyperParams)
+                                              100, ReLUActivation(), hyperParams)
+        self.__secondHiddenLayer = HiddenLayer(100, nOfLabels, NonActivation(), hyperParams)
 
         self.__classifier = SoftMax(hyperParams)
 
@@ -41,6 +41,7 @@ class Model(object):
             print('batch: ', str(start), ' - ', str(endBatch))
             decreasingByIteration = nOfIterations
             initStep = self.__hyperParams.stepSize
+
             for iteration in range(nOfIterations):
                 print("iteration: ", iteration)
 
@@ -48,15 +49,15 @@ class Model(object):
                 fConvForward = self.__firstConvLayer.forward(batchedData)
 
                 # some visible proof
-                if (iteration > (2/100 * nOfIterations)):
-                    saveFeatureDepth(fConvForward[0], 'conv1')
+                if (iteration > (90 / 100 * nOfIterations)):
+                    exportPNGs(fConvForward[0], 'conv1')
                 fRelu = self.__reluLayer.forward(fConvForward)
                 fPoolForward = self.__fPoolingLayer.forward(fRelu)
                 sConvForward = self.__secondConvLayer.forward(fPoolForward)
 
                 # some visible proof
-                if (iteration > (80/100 * nOfIterations)):
-                    saveFeatureDepth(sConvForward[0], 'conv2')
+                if (iteration > (90 / 100 * nOfIterations)):
+                    exportPNGs(sConvForward[0], 'conv2')
 
                 sPoolForward = self.__sPoolingLayer.forward(sConvForward)
                 flatten = self.__flattenLayer.forward(sPoolForward)
@@ -95,9 +96,9 @@ class Model(object):
                 break
 
     def __saveFeatures(self):
-        for feature in self.__firstConvLayer.getFeatures():
-            parsed = feature.reshape(3, 3)
-            Image.fromarray(parsed, 'L').resize((100, 100)).save('../features/' + str(id(parsed)) + '.png')
+        filters, number, size, depth = self.__firstConvLayer.getFilters()
+        parsed = filters.reshape(number * depth, size, size)
+        exportPNGs(parsed, 'filter-conv1')
 
     def validate(self, dataset):
         data = dataset[0]
@@ -107,7 +108,9 @@ class Model(object):
         fConvForward = self.__firstConvLayer.forward(data)
         fReluForward = self.__reluLayer.forward(fConvForward)
         fPoolForward = self.__fPoolingLayer.forward(fReluForward)
-        flatten = self.__flattenLayer.forward(fPoolForward)
+        sConvForward = self.__secondConvLayer.forward(fPoolForward)
+        sPoolForward = self.__sPoolingLayer.forward(sConvForward)
+        flatten = self.__flattenLayer.forward(sPoolForward)
 
         # Fully connected start
         f = self.__firstHiddenLayer.forward(flatten)

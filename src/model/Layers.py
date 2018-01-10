@@ -57,17 +57,17 @@ class ConvLayer(object):
         features is an array of feature matrices
     '''
 
-    def __init__(self, params, hyperParams, featureDepth = 1):
+    def __init__(self, params, hyperParams, featureDepth=1):
         self.__receptiveFieldSize = params['receptiveFieldSize']
         self.__stride = params['stride']
         self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
-        self.__featureNumber = params['f_number']
-        self.__featureDepth = featureDepth
-        size = self.__receptiveFieldSize * self.__receptiveFieldSize * self.__featureDepth
+        self.__filterNumber = params['f_number']
+        self.__filterDepth = featureDepth
+        size = self.__receptiveFieldSize * self.__receptiveFieldSize * self.__filterDepth
 
         # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
         # and flattened `em to 1 X size * size , further needs
-        self.__features = np.random.uniform(-1, 1, (self.__featureNumber, size))
+        self.__features = np.random.uniform(-1, 1, (self.__filterNumber, size))
 
         self.__hyperparams = hyperParams
 
@@ -84,7 +84,7 @@ class ConvLayer(object):
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
         # using magic padding
         # output depth ?
-        reshaped = weighted.reshape((self.__featureNumber , X.shape[2], X.shape[3], X.shape[0]))
+        reshaped = weighted.reshape((self.__filterNumber, X.shape[2], X.shape[3], X.shape[0]))
 
         self.__cache = deepcopy(X), deepcopy(XCol)
         return reshaped.transpose(3, 0, 1, 2)
@@ -97,7 +97,7 @@ class ConvLayer(object):
         X, XCol = self.__cache
 
         # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n) and reshape to (filter_N X filter_h * filter_w & input_n)
-        gradientsReshaped = gradients.transpose(1, 2, 3, 0).reshape(self.__featureNumber, -1)
+        gradientsReshaped = gradients.transpose(1, 2, 3, 0).reshape(self.__filterNumber, -1)
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
@@ -110,8 +110,8 @@ class ConvLayer(object):
 
         return dX
 
-    def getFeatures(self):
-        return self.__features
+    def getFilters(self):
+        return self.__features, self.__filterNumber, self.__receptiveFieldSize, self.__filterDepth
 
 
 '''

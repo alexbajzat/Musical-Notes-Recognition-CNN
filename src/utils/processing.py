@@ -70,7 +70,7 @@ def scaleBetweenValues(array, lowerBound=0, upperBound=1, dtype=int):
 '''
     save feature map of conv as pngs
 '''
-def saveFeatureDepth(featured, opType):
+def exportPNGs(featured, opType):
     for img in featured:
         img = scaleBetweenValues(img, 0, 255)
         fromarray = Image.fromarray(img)
