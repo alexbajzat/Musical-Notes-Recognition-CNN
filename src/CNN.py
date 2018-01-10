@@ -11,7 +11,7 @@ class Model(object):
         self.__classifier = classifier
         self.__layers = layers
 
-    def train(self, dataset):
+    def train(self, dataset, validationSet):
         rawData = dataset[0]
         labels = dataset[1]
         start = 0
@@ -32,7 +32,7 @@ class Model(object):
                     data = layer.forward(data)
 
                     # todo maybe add convs weights to regularization ?
-                    if (type == LayerType.HIDDEN):
+                    if (type == LayerType.HIDDEN or type == LayerType.CONV ):
                         weights.append(layer.getWeights())
 
                     if (iteration > (90 / 100 * nOfIterations) and type == LayerType.CONV):
@@ -44,6 +44,7 @@ class Model(object):
                 for layer, type in reversed(self.__layers):
                     back = layer.backprop(back)
 
+            self.validate(validationSet)
             # next batch
             start += self.__batchSize
             endBatch = start + self.__batchSize

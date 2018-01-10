@@ -57,8 +57,7 @@ def doTheStuff(data):
 
     # model getting trained
     model = Model(layers, classifier, BATCH_SIZE)
-    model.train(trainingDataset)
-    model.validate(validatingDataset)
+    model.train(trainingDataset, validatingDataset)
     return model
 
 

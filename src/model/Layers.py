@@ -113,6 +113,9 @@ class ConvLayer(object):
     def getFilters(self):
         return self.__features, self.__filterNumber, self.__receptiveFieldSize, self.__filterDepth
 
+    def getWeights(self):
+        return self.__features
+
 
 '''
     layer class which just passes the input thru an activation
