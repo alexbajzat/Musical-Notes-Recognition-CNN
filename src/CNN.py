@@ -8,14 +8,17 @@ class Model(object):
     def __init__(self, inputSize, nOfLabels, classifier, hyperParams, convParams, batchSize):
         self.__firstConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams)
         self.__fPoolingLayer = PoolLayer()
+        self.__secondConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams,
+                                           featureDepth=convParams['f_number'])
         self.__sPoolingLayer = PoolLayer()
         self.__reluLayer = REluActivationLayer()
         self.__flattenLayer = FlattenLayer()
-        self.__entrySize = 14
-        self.__entryChannelSize = 1
         self.__nOfLabels = nOfLabels
-        # todo remove hardcoded stuff
-        self.__firstHiddenLayer = HiddenLayer(32 * 32 * 10, 50, ReLUActivation(), hyperParams)
+
+        # watch-out for the input size of the first fully net
+        # /4 comes from the number of pooling layers ( they shrink 2X the data)
+        self.__firstHiddenLayer = HiddenLayer(int(np.power(np.sqrt(inputSize / 4), 2) * convParams['f_number'] / 4),
+                                              50, ReLUActivation(), hyperParams)
         self.__secondHiddenLayer = HiddenLayer(50, nOfLabels, NonActivation(), hyperParams)
         self.__classifier = classifier
         self.__hyperParams = hyperParams
@@ -46,8 +49,11 @@ class Model(object):
                 #
                 fPoolForward = self.__fPoolingLayer.forward(fRelu)
 
+                sConvforward = self.__secondConvLayer.forward(fPoolForward)
 
-                flatten = self.__flattenLayer.forward(fPoolForward)
+                sPoolForward = self.__sPoolingLayer.forward(sConvforward)
+
+                flatten = self.__flattenLayer.forward(sPoolForward)
 
                 # Fully connected start
                 f = self.__firstHiddenLayer.forward(flatten)
@@ -64,7 +70,9 @@ class Model(object):
                 # backprop into flatten layer
                 # from here we backprop to convs
                 unflatten = self.__flattenLayer.backprop(firstHiddenGrads)
-                fPoolBack = self.__fPoolingLayer.backprop(unflatten)
+                sPoolBack = self.__sPoolingLayer.backprop(unflatten)
+                sConvBack = self.__secondConvLayer.backprop(sPoolBack)
+                fPoolBack = self.__fPoolingLayer.backprop(sConvBack)
                 fReluBack = self.__reluLayer.backward(fConvForward, fPoolBack)
                 self.__firstConvLayer.backprop(fReluBack)
                 # done propagating to convs

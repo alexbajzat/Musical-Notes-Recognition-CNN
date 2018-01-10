@@ -53,13 +53,13 @@ class ConvLayer(object):
         features is an array of feature matrices
     '''
 
-    def __init__(self, params, hyperParams):
+    def __init__(self, params, hyperParams, featureDepth = 1):
         self.__receptiveFieldSize = params['receptiveFieldSize']
         self.__stride = params['stride']
         self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
         self.__featureNumber = params['f_number']
-
-        size = self.__receptiveFieldSize * self.__receptiveFieldSize
+        self.__featureDepth = featureDepth
+        size = self.__receptiveFieldSize * self.__receptiveFieldSize * self.__featureDepth
 
         # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
         # and flattened `em to 1 X size * size , further needs
@@ -79,7 +79,8 @@ class ConvLayer(object):
 
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
         # using magic padding
-        reshaped = weighted.reshape((self.__featureNumber, X.shape[2], X.shape[3], X.shape[0]))
+        # output depth ?
+        reshaped = weighted.reshape((self.__featureNumber , X.shape[2], X.shape[3], X.shape[0]))
 
         self.__cache = X, XCol
         return reshaped.transpose(3, 0, 1, 2)
@@ -96,7 +97,7 @@ class ConvLayer(object):
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
-        self.__features += -self.__hyperparams.featureStepSize * dFeatures
+        self.__features += self.__hyperparams.featureStepSize * dFeatures
 
         # calculate gradients on input
         dXCol = np.dot(np.transpose(self.__features), gradientsReshaped)
