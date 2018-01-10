@@ -35,7 +35,7 @@ def doTheStuff(data):
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10}
 
     # model getting trained
-    model = Model(inputSize * inputSize, 10, SoftMax(hyperParams), hyperParams, params, BATCH_SIZE)
+    model = Model(inputSize * inputSize, 7, hyperParams, params, BATCH_SIZE)
     model.train(trainingDataset)
     model.validate(validatingDataset)
     return model
@@ -58,4 +58,4 @@ def play():
         print('predicting... ')
 
 
-trainWithMnist()
+train()

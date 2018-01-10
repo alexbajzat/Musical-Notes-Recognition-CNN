@@ -1,5 +1,6 @@
 import numpy as np
 from PIL import Image
+import datetime
 
 
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
@@ -55,3 +56,25 @@ def col2im_indices(cols, x_shape, field_height=3, field_width=3, padding=1,
     if padding == 0:
         return x_padded
     return x_padded[:, :, padding:-padding, padding:-padding]
+
+
+def scaleBetweenValues(array, lowerBound=0, upperBound=1, dtype=int):
+    min = np.min(array)
+    max = np.amax(array)
+
+    normalized = array[:]
+    normalized -= min
+    normalized *= ((upperBound - lowerBound) / (max - min) + lowerBound)
+    return np.ndarray.astype(normalized, dtype)
+
+'''
+    save feature map of conv as pngs
+'''
+def saveFeatureDepth(featured, opType):
+    for img in featured:
+        img = scaleBetweenValues(img, 0, 255)
+        fromarray = Image.fromarray(img)
+        grayscale = fromarray.convert('L')
+        resized = grayscale.resize((100, 100))
+        now = datetime.datetime.now()
+        resized.save('../features/' + str(now.strftime("%Y-%m-%d-%Hhh%Mmm")) + '-' + opType + "-" + str(id(img)) + '.png')

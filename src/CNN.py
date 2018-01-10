@@ -1,11 +1,14 @@
 import numpy as np
 from PIL import Image
 from src.model.Activations import NonActivation, ReLUActivation
+from src.model.Classifiers import SoftMax
 from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer, REluActivationLayer
+from src.utils.processing import saveFeatureDepth
 
 
 class Model(object):
-    def __init__(self, inputSize, nOfLabels, classifier, hyperParams, convParams, batchSize):
+
+    def __init__(self, inputSize, nOfLabels, hyperParams, convParams, batchSize):
         self.__firstConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams)
         self.__fPoolingLayer = PoolLayer()
         self.__secondConvLayer = ConvLayer(params=convParams, hyperParams=hyperParams,
@@ -20,7 +23,9 @@ class Model(object):
         self.__firstHiddenLayer = HiddenLayer(int(np.power(np.sqrt(inputSize / 4), 2) * convParams['f_number'] / 4),
                                               50, ReLUActivation(), hyperParams)
         self.__secondHiddenLayer = HiddenLayer(50, nOfLabels, NonActivation(), hyperParams)
-        self.__classifier = classifier
+
+        self.__classifier = SoftMax(hyperParams)
+
         self.__hyperParams = hyperParams
         self.__batchSize = batchSize
 
@@ -41,24 +46,24 @@ class Model(object):
 
                 # conv stuff
                 fConvForward = self.__firstConvLayer.forward(batchedData)
-                fRelu = self.__reluLayer.forward(fConvForward)
 
                 # some visible proof
-                if (iteration > 90):
-                    self.__saveImageFeatured(fConvForward[0], 'conv')
-                #
+                if (iteration > 2):
+                    saveFeatureDepth(fConvForward[0], 'conv1')
+                fRelu = self.__reluLayer.forward(fConvForward)
                 fPoolForward = self.__fPoolingLayer.forward(fRelu)
+                sConvForward = self.__secondConvLayer.forward(fPoolForward)
 
-                sConvforward = self.__secondConvLayer.forward(fPoolForward)
-
-                sPoolForward = self.__sPoolingLayer.forward(sConvforward)
+                # some visible proof
+                if (iteration > 2):
+                    saveFeatureDepth(sConvForward[0], 'conv2')
+                sPoolForward = self.__sPoolingLayer.forward(sConvForward)
 
                 flatten = self.__flattenLayer.forward(sPoolForward)
 
                 # Fully connected start
                 f = self.__firstHiddenLayer.forward(flatten)
                 s = self.__secondHiddenLayer.forward(f)
-
                 # gradients on score
                 scores = self.__classifier.compute(s, batchedLabels, (
                     self.__firstHiddenLayer.getWeights(), self.__secondHiddenLayer.getWeights()))
@@ -66,7 +71,6 @@ class Model(object):
                 # backprop in fully connected
                 sGrads = self.__secondHiddenLayer.backpropagate(f, scores)
                 firstHiddenGrads = self.__firstHiddenLayer.backpropagate(flatten, sGrads)
-
                 # backprop into flatten layer
                 # from here we backprop to convs
                 unflatten = self.__flattenLayer.backprop(firstHiddenGrads)
@@ -90,16 +94,10 @@ class Model(object):
             if (endBatch >= len(data)):
                 break
 
-        # save features as pngs
+    def __saveFeatures(self):
         for feature in self.__firstConvLayer.getFeatures():
             parsed = feature.reshape(3, 3)
             Image.fromarray(parsed, 'L').resize((100, 100)).save('../features/' + str(id(parsed)) + '.png')
-
-        self.__saveWeights()
-
-    def __saveImageFeatured(self, featured, opType):
-        for img in featured:
-            Image.fromarray(img, 'L').resize((100, 100)).save('../features/' + opType + "-" + str(id(img)) + '.png')
 
     def validate(self, dataset):
         data = dataset[0]
