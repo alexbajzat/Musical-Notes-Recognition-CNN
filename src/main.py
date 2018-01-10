@@ -9,10 +9,12 @@ from src.CNN import Model
 from src.model.Layers import ConvLayer, PoolLayer, REluActivationLayer, FlattenLayer, HiddenLayer
 from src.data.constants import LayerType
 
-STEP_SIZE = 1e-6
+STEP_SIZE = 1e-5
 FEATURE_STEP_SIZE = 1e-1
 REG = 1e-3
 BATCH_SIZE = 100
+FULLY_CONNECTED_NEURONS = 50
+LABELS_NUMBER = 10
 
 
 def doTheStuff(data):
@@ -30,13 +32,13 @@ def doTheStuff(data):
         datasetValues[position] = value.getData()
         datasetLabels[position] = value.getLabel()
         position += 1
+    trainingUpperBound = datasetSize - int(20/100 * datasetSize)
 
-    trainingDataset = datasetValues[0:400], datasetLabels[0:400]
-    validatingDataset = datasetValues[400:], datasetLabels[400:]
+    trainingDataset = datasetValues[0:trainingUpperBound], datasetLabels[0:trainingUpperBound]
+    validatingDataset = datasetValues[trainingUpperBound:], datasetLabels[trainingUpperBound:]
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10}
-    nOfLabels = 7
 
     layers = []
     layers.append((ConvLayer(params=params, hyperParams=hyperParams), LayerType.CONV))
@@ -49,8 +51,8 @@ def doTheStuff(data):
     # watch-out for the input size of the first fully net
     # /4 comes from the number of pooling layers ( they shrink 2X the data)
     layers.append((HiddenLayer(int(np.power(inputSize / 4, 2) * params['f_number']),
-                               100, ReLUActivation(), hyperParams), LayerType.HIDDEN))
-    layers.append((HiddenLayer(100, nOfLabels, NonActivation(), hyperParams), LayerType.HIDDEN))
+                               FULLY_CONNECTED_NEURONS, ReLUActivation(), hyperParams), LayerType.HIDDEN))
+    layers.append((HiddenLayer(FULLY_CONNECTED_NEURONS, LABELS_NUMBER, NonActivation(), hyperParams), LayerType.HIDDEN))
     classifier = SoftMax(hyperParams)
 
     # model getting trained
@@ -67,7 +69,6 @@ def trainWithMnist():
 
 def train():
     data = initDataset()
-
     doTheStuff(data)
 
 
@@ -77,4 +78,4 @@ def play():
         print('predicting... ')
 
 
-train()
+trainWithMnist()

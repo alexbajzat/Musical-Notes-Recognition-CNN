@@ -1,10 +1,6 @@
 import numpy as np
-from PIL import Image
 
 from src.data.constants import LayerType
-from src.model.Activations import NonActivation, ReLUActivation
-from src.model.Classifiers import SoftMax
-from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer, REluActivationLayer
 from src.utils.processing import exportPNGs
 
 
@@ -16,13 +12,13 @@ class Model(object):
         self.__layers = layers
 
     def train(self, dataset):
-        data = dataset[0]
+        rawData = dataset[0]
         labels = dataset[1]
         start = 0
         endBatch = self.__batchSize
         nOfIterations = 100
         while (True):
-            batchedData = data[start:endBatch]
+            batchedData = rawData[start:endBatch]
             batchedLabels = labels[start:endBatch]
             print('batch: ', str(start), ' - ', str(endBatch))
 
@@ -51,7 +47,7 @@ class Model(object):
             # next batch
             start += self.__batchSize
             endBatch = start + self.__batchSize
-            if (endBatch >= len(data)):
+            if (endBatch >= len(rawData)):
                 break
 
     def __saveFeatures(self, convLayer):

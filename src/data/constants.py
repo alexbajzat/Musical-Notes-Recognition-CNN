@@ -7,3 +7,4 @@ class LayerType(Enum):
     POOLING = 'pool',
     ACTIVATION = 'active',
     FLAT = 'flat'
+
