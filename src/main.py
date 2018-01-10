@@ -2,8 +2,12 @@ import numpy as np
 import random
 from src.data.Setup import initDataset, Constants
 from src.data.mnistdata import initMNISTDataset
+from src.model.Activations import ReLUActivation, NonActivation
+from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.CNN import Model
+from src.model.Layers import ConvLayer, PoolLayer, REluActivationLayer, FlattenLayer, HiddenLayer
+from src.data.constants import LayerType
 
 STEP_SIZE = 1e-6
 FEATURE_STEP_SIZE = 1e-1
@@ -32,9 +36,25 @@ def doTheStuff(data):
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
     params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10}
+    nOfLabels = 7
+
+    layers = []
+    layers.append((ConvLayer(params=params, hyperParams=hyperParams), LayerType.CONV))
+    layers.append((PoolLayer(), LayerType.POOLING))
+    layers.append((ConvLayer(params=params, hyperParams=hyperParams,
+                             featureDepth=params['f_number']), LayerType.CONV))
+    layers.append((PoolLayer(), LayerType.POOLING))
+    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+    layers.append((FlattenLayer(), LayerType.FLAT))
+    # watch-out for the input size of the first fully net
+    # /4 comes from the number of pooling layers ( they shrink 2X the data)
+    layers.append((HiddenLayer(int(np.power(inputSize / 4, 2) * params['f_number']),
+                               100, ReLUActivation(), hyperParams), LayerType.HIDDEN))
+    layers.append((HiddenLayer(100, nOfLabels, NonActivation(), hyperParams), LayerType.HIDDEN))
+    classifier = SoftMax(hyperParams)
 
     # model getting trained
-    model = Model(inputSize * inputSize, 7, hyperParams, params, BATCH_SIZE)
+    model = Model(layers, classifier, BATCH_SIZE)
     model.train(trainingDataset)
     model.validate(validatingDataset)
     return model

@@ -28,7 +28,7 @@ class HiddenLayer(object):
         result = np.dot(X, self.__weights) + self.__biases
         return self.__activation.apply(result)
 
-    def backpropagate(self, gradients):
+    def backprop(self, gradients):
         X = self.__cache
         deltaWeights = np.dot(np.transpose(X), gradients)
         deltaBiases = np.sum(gradients, axis=0, keepdims=True)
@@ -175,9 +175,11 @@ class REluActivationLayer(object):
         self.__activation = ReLUActivation()
 
     def forward(self, X):
+        self.__cache = deepcopy(X)
         return self.__activation.apply(X)
 
-    def backward(self, X, gradients):
+    def backprop(self, gradients):
+        X = self.__cache
         return self.__activation.derivative(X, gradients)
 
 
