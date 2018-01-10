@@ -63,7 +63,7 @@ class ConvLayer(object):
 
         # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
         # and flattened `em to 1 X size * size , further needs
-        self.__features = np.random.randn(self.__featureNumber, size)
+        self.__features = np.random.uniform(-1, 1, (self.__featureNumber, size))
 
         self.__hyperparams = hyperParams
 
