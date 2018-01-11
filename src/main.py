@@ -49,12 +49,10 @@ def doTheStuff(data):
 
     layers.append(
         (ConvLayer(params=fConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
-    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
     layers.append((PoolLayer(), LayerType.POOLING))
 
     layers.append((ConvLayer(params=sConvparams, hyperParams=hyperParams,
                              featureDepth=fConvparams['f_number']), LayerType.CONV))
-    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
     layers.append((PoolLayer(), LayerType.POOLING))
 
     layers.append((FlattenLayer(), LayerType.FLAT))
