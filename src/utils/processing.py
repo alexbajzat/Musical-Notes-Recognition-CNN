@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 from PIL import Image
 import datetime
@@ -72,7 +74,8 @@ def scaleBetweenValues(array, lowerBound=0, upperBound=1, dtype=int):
 '''
 def exportPNGs(featured, opType):
     for img in featured:
-        img = scaleBetweenValues(img, 0, 255)
+        copy = deepcopy(img)
+        copy = scaleBetweenValues(copy, 0, 255)
         fromarray = Image.fromarray(img)
         grayscale = fromarray.convert('L')
         resized = grayscale.resize((100, 100))

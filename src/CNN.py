@@ -6,23 +6,23 @@ from src.utils.processing import exportPNGs
 
 class Model(object):
 
-    def __init__(self, layers, classifier, batchSize):
+    def __init__(self, layers, classifier, batchSize, iterations=100):
         self.__batchSize = batchSize
         self.__classifier = classifier
         self.__layers = layers
+        self.__iterations = iterations
 
     def train(self, dataset, validationSet):
         rawData = dataset[0]
         labels = dataset[1]
         start = 0
         endBatch = self.__batchSize
-        nOfIterations = 100
         while (True):
             batchedData = rawData[start:endBatch]
             batchedLabels = labels[start:endBatch]
             print('batch: ', str(start), ' - ', str(endBatch))
 
-            for iteration in range(nOfIterations):
+            for iteration in range(self.__iterations):
                 print("iteration: ", iteration)
                 data = batchedData
                 weights = []
@@ -32,10 +32,10 @@ class Model(object):
                     data = layer.forward(data)
 
                     # todo maybe add convs weights to regularization ?
-                    if (type == LayerType.HIDDEN or type == LayerType.CONV ):
+                    if (type == LayerType.HIDDEN or type == LayerType.CONV):
                         weights.append(layer.getWeights())
 
-                    if (iteration > (90 / 100 * nOfIterations) and type == LayerType.CONV):
+                    if (iteration > (90 / 100 * self.__iterations) and type == LayerType.CONV):
                         exportPNGs(data[0], str(type))
                 # scores
                 back = self.__classifier.compute(data, batchedLabels, weights)

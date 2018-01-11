@@ -9,12 +9,12 @@ from src.CNN import Model
 from src.model.Layers import ConvLayer, PoolLayer, REluActivationLayer, FlattenLayer, HiddenLayer
 from src.data.constants import LayerType
 
-STEP_SIZE = 1e-5
-FEATURE_STEP_SIZE = 1e-1
+STEP_SIZE = 1e-6
+FEATURE_STEP_SIZE = 1e-6
 REG = 1e-3
 BATCH_SIZE = 100
 FULLY_CONNECTED_NEURONS = 50
-LABELS_NUMBER = 10
+LABELS_NUMBER = 7
 
 
 def doTheStuff(data):
@@ -32,26 +32,41 @@ def doTheStuff(data):
         datasetValues[position] = value.getData()
         datasetLabels[position] = value.getLabel()
         position += 1
-    trainingUpperBound = datasetSize - int(20/100 * datasetSize)
+
+    trainingUpperBound = datasetSize - int(20 / 100 * datasetSize)
 
     trainingDataset = datasetValues[0:trainingUpperBound], datasetLabels[0:trainingUpperBound]
     validatingDataset = datasetValues[trainingUpperBound:], datasetLabels[trainingUpperBound:]
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
-    params = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10}
+    fConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5}
+    sConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10}
 
     layers = []
-    layers.append((ConvLayer(params=params, hyperParams=hyperParams), LayerType.CONV))
-    layers.append((PoolLayer(), LayerType.POOLING))
-    layers.append((ConvLayer(params=params, hyperParams=hyperParams,
-                             featureDepth=params['f_number']), LayerType.CONV))
-    layers.append((PoolLayer(), LayerType.POOLING))
+    layers.append((ConvLayer(params=fConvparams, hyperParams=hyperParams), LayerType.CONV))
     layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+    layers.append((PoolLayer(), LayerType.POOLING))
+
+    layers.append(
+        (ConvLayer(params=fConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
+    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+    layers.append((PoolLayer(), LayerType.POOLING))
+
+    layers.append((ConvLayer(params=sConvparams, hyperParams=hyperParams,
+                             featureDepth=fConvparams['f_number']), LayerType.CONV))
+    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+    layers.append((PoolLayer(), LayerType.POOLING))
+
     layers.append((FlattenLayer(), LayerType.FLAT))
     # watch-out for the input size of the first fully net
     # /4 comes from the number of pooling layers ( they shrink 2X the data)
-    layers.append((HiddenLayer(int(np.power(inputSize / 4, 2) * params['f_number']),
-                               FULLY_CONNECTED_NEURONS, ReLUActivation(), hyperParams), LayerType.HIDDEN))
+
+    # shrink is done with 2^n_of_pools
+    inputShrink = np.power(2, 3)
+    fHiddenInput = int(np.power(inputSize / inputShrink, 2) * sConvparams['f_number'])
+    # fHiddenInput = 64 * 64 * 1
+    layers.append((HiddenLayer(fHiddenInput,
+                               FULLY_CONNECTED_NEURONS, NonActivation(), hyperParams), LayerType.HIDDEN))
     layers.append((HiddenLayer(FULLY_CONNECTED_NEURONS, LABELS_NUMBER, NonActivation(), hyperParams), LayerType.HIDDEN))
     classifier = SoftMax(hyperParams)
 
@@ -77,4 +92,4 @@ def play():
         print('predicting... ')
 
 
-trainWithMnist()
+train()
