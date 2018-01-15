@@ -99,12 +99,13 @@ def exportHistory(export):
 
     file.write('<h2> configuration </h2>')
     file.write('<table style="border:1px solid black;" cellpadding="10">')
-    file.write('<tr><th>EPOCH</th><th>LOSS</th></tr>')
+    file.write('<tr><th>EPOCH</th><th>LOSS</th><th>ACCURACY</th></tr>')
     epoch = 1
     for step in history:
         file.write('<tr>')
         file.write('<td>' + str(epoch) + '</td>')
-        file.write('<td>' + str(step) + '</td>')
+        file.write('<td>' + str(step[0]) + '</td>')
+        file.write('<td>' + str(int(step[1] * 100))+ "%" + '</td>')
         file.write('</tr>')
         epoch += 1
     file.write('</table>')
