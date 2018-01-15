@@ -26,11 +26,11 @@ class SoftMax(object):
 
         # total loss data loss + regularization loss
         loss = dataLoss + regularizationLoss
-        print('loss: ', loss, '\n')
+        print('loss: ', loss)
 
         # calculate the derivative
         derivativeProbs = probabilites
         derivativeProbs[range(inputNumber), np.transpose(labels)] -= 1
         derivativeProbs /= inputNumber
 
-        return derivativeProbs
+        return derivativeProbs, loss

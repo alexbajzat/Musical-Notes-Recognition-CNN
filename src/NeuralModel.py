@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.data.constants import LayerType
-from src.utils.processing import exportPNGs
+from src.utils.processing import exportPNGs, exportHistory
 
 
 class Model(object):
@@ -11,6 +11,7 @@ class Model(object):
         self.__classifier = classifier
         self.__layers = layers
         self.__iterations = iterations
+        self.__history = []
 
     def train(self, dataset, validationSet):
         rawData = dataset[0]
@@ -22,8 +23,8 @@ class Model(object):
             batchedLabels = labels[start:endBatch]
             print('batch: ', str(start), ' - ', str(endBatch))
 
-            for iteration in range(self.__iterations):
-                print("iteration: ", iteration)
+            for epoch in range(self.__iterations):
+                print("epoch: ", epoch)
                 data = batchedData
                 weights = []
 
@@ -31,30 +32,43 @@ class Model(object):
                 for layer, type in self.__layers:
                     data = layer.forward(data)
 
-                    # todo maybe add convs weights to regularization ?
                     if (type == LayerType.HIDDEN or type == LayerType.CONV):
                         weights.append(layer.getWeights())
 
-                    if (iteration > (90 / 100 * self.__iterations) and type == LayerType.CONV):
-                        exportPNGs(data[0], str(type))
+                    if (epoch > (90 / 100 * self.__iterations) and type == LayerType.CONV):
+                        exportPNGs(data[0], str(type) + " " + str(batchedLabels[0]))
                 # scores
-                back = self.__classifier.compute(data, batchedLabels, weights)
+                back, loss = self.__classifier.compute(data, batchedLabels, weights)
+
+                # keep for later export
+                self.__history.append(loss)
+
 
                 # backpropagation
                 for layer, type in reversed(self.__layers):
                     back = layer.backprop(back)
 
-            self.validate(validationSet)
+                #validate
+                self.validate(validationSet)
+                print('\n')
+
             # next batch
             start += self.__batchSize
             endBatch = start + self.__batchSize
             if (endBatch >= len(rawData)):
                 break
+        self.__saveHistory()
 
     def __saveFeatures(self, convLayer):
         filters, number, size, depth = convLayer.getFilters()
         parsed = filters.reshape(number * depth, size, size)
         exportPNGs(parsed, 'filter-conv1')
+
+    def __saveHistory(self):
+        exportHistory((self.__history, 'conf'))
+
+
+
 
     def validate(self, dataset):
         data = dataset[0]

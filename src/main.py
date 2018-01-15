@@ -1,19 +1,21 @@
-import numpy as np
 import random
+
+import numpy as np
+
 from src.data.Setup import initDataset, Constants
+from src.data.constants import LayerType
 from src.data.mnistdata import initMNISTDataset
-from src.model.Activations import ReLUActivation, NonActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
-from src.CNN import Model
-from src.model.Layers import ConvLayer, PoolLayer, REluActivationLayer, FlattenLayer, HiddenLayer
-from src.data.constants import LayerType
+from src.model.Activations import ReLUActivation, NonActivation
+from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, REluActivationLayer, FlattenLayer
+from src.NeuralModel import Model
 
-STEP_SIZE = 1e-7
-FEATURE_STEP_SIZE = 1e-4
+STEP_SIZE = 1e-6
+FEATURE_STEP_SIZE = 1e-6
 REG = 1e-4
-BATCH_SIZE = 50
-FULLY_CONNECTED_NEURONS = 100
+BATCH_SIZE = 32
+FULLY_CONNECTED_NEURONS = 50
 LABELS_NUMBER = 7
 
 
@@ -33,29 +35,36 @@ def doTheStuff(data):
         datasetLabels[position] = value.getLabel()
         position += 1
 
-    trainingUpperBound = datasetSize - int(20 / 100 * datasetSize)
+    # dataset - batch-size = amount of data trained
+    #
+    trainingUpperBound = datasetSize - BATCH_SIZE
 
     trainingDataset = datasetValues[0:trainingUpperBound], datasetLabels[0:trainingUpperBound]
     validatingDataset = datasetValues[trainingUpperBound:], datasetLabels[trainingUpperBound:]
     hyperParams = HyperParams(STEP_SIZE, REG, FEATURE_STEP_SIZE)
 
     fConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 5
-        , 'filter_distribution_interval': (-1e-1, 1e-1)}
-    sConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10
-        , 'filter_distribution_interval': (-1e-1, 1e-1)}
+        , 'filter_distribution_interval': (-1, 1)}
+    sConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 15
+        , 'filter_distribution_interval': (-1, 1)}
 
+    # init layers
     layers = []
+
+    # add `em
+
+    # conv-relu-conv-relu-pool
     layers.append((ConvLayer(params=fConvparams, hyperParams=hyperParams), LayerType.CONV))
+    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+    layers.append(
+        (ConvLayer(params=fConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
     layers.append((REluActivationLayer(), LayerType.ACTIVATION))
     layers.append((PoolLayer(), LayerType.POOLING))
 
+    # conv-relu-pool
     layers.append(
-        (ConvLayer(params=fConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
-    layers.append((PoolLayer(), LayerType.POOLING))
-
-    layers.append((ConvLayer(params=sConvparams, hyperParams=hyperParams,
-                             featureDepth=fConvparams['f_number']), LayerType.CONV))
-
+        (ConvLayer(params=sConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
+    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
     layers.append((PoolLayer(), LayerType.POOLING))
 
     layers.append((FlattenLayer(), LayerType.FLAT))
@@ -63,16 +72,17 @@ def doTheStuff(data):
     # /4 comes from the number of pooling layers ( they shrink 2X the data)
 
     # shrink is done with 2^n_of_pools
-    # inputShrink = np.power(2, 3)
-    # fHiddenInput = int(np.power(inputSize / inputShrink, 2) * sConvparams['f_number'])
-    # fHiddenInput = 64 * 64 * 1
-    # layers.append((HiddenLayer(fHiddenInput,
-    #                            FULLY_CONNECTED_NEURONS, NonActivation(), hyperParams), LayerType.HIDDEN))
-    # layers.append((HiddenLayer(FULLY_CONNECTED_NEURONS, LABELS_NUMBER, NonActivation(), hyperParams), LayerType.HIDDEN))
+    poolN = len([t for t in layers if t[1] == LayerType.POOLING])
+    inputShrink = np.power(2, poolN)
+    fHiddenInput = int(np.power(inputSize / inputShrink, 2) * sConvparams['f_number'])
+    layers.append((HiddenLayer(fHiddenInput,
+                               FULLY_CONNECTED_NEURONS, NonActivation(), hyperParams), LayerType.HIDDEN))
+    layers.append((HiddenLayer(FULLY_CONNECTED_NEURONS, LABELS_NUMBER, NonActivation(), hyperParams), LayerType.HIDDEN))
+
     classifier = SoftMax(hyperParams)
 
     # model getting trained
-    model = Model(layers, classifier, BATCH_SIZE)
+    model = Model(layers, classifier, BATCH_SIZE, iterations=50)
     model.train(trainingDataset, validatingDataset)
     return model
 

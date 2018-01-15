@@ -69,15 +69,42 @@ def scaleBetweenValues(array, lowerBound=0, upperBound=1, dtype=int):
     normalized *= ((upperBound - lowerBound) / (max - min) + lowerBound)
     return np.ndarray.astype(normalized, dtype)
 
+
 '''
     save feature map of conv as pngs
 '''
+
+
 def exportPNGs(featured, opType):
     for img in featured:
         copy = deepcopy(img)
         copy = scaleBetweenValues(copy, 0, 255)
-        fromarray = Image.fromarray(img)
+        fromarray = Image.fromarray(copy)
         grayscale = fromarray.convert('L')
         resized = grayscale.resize((100, 100))
         now = datetime.datetime.now()
-        resized.save('../features/' + str(now.strftime("%Y-%m-%d-%Hhh%Mmm")) + '-' + opType + "-" + str(id(img)) + '.png')
+        resized.save(
+            '../features/' + str(now.strftime("%Y-%m-%d-%Hhh%Mmm")) + '-' + opType + "-" + str(id(img)) + '.png')
+
+
+'''
+    export model`s training as html
+'''
+
+
+def exportHistory(export):
+    history, configuration = export
+    now = datetime.datetime.now()
+    file = open('../history/' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.html', 'w+')
+
+    file.write('<h2> configuration </h2>')
+    file.write('<table style="border:1px solid black;" cellpadding="10">')
+    file.write('<tr><th>EPOCH</th><th>LOSS</th></tr>')
+    epoch = 1
+    for step in history:
+        file.write('<tr>')
+        file.write('<td>' + str(epoch) + '</td>')
+        file.write('<td>' + str(step) + '</td>')
+        file.write('</tr>')
+        epoch += 1
+    file.write('</table>')

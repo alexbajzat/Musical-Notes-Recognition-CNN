@@ -72,6 +72,7 @@ class ConvLayer(object):
 
         self.__hyperparams = hyperParams
 
+
     '''
             X is an array of pixel matrices
             returns the features map
