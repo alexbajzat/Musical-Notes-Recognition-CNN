@@ -40,8 +40,7 @@ class Model(object):
                 # scores
                 back, loss = self.__classifier.compute(data, batchedLabels, weights)
 
-                # keep for later export
-                self.__history.append(loss)
+
 
 
                 # backpropagation
@@ -49,7 +48,10 @@ class Model(object):
                     back = layer.backprop(back)
 
                 #validate
-                self.validate(validationSet)
+                acc = self.validate(validationSet)
+
+                # keep for later export
+                self.__history.append((loss, acc))
                 print('\n')
 
             # next batch
@@ -80,7 +82,9 @@ class Model(object):
 
         # scores
         predictedClasses = np.argmax(data, axis=1)
-        print('training accuracy:', (np.mean(predictedClasses == np.transpose(labels))))
+        mean = np.mean(predictedClasses == np.transpose(labels))
+        print('training accuracy:', (mean))
+        return mean
 
     def __saveWeights(self, layers):
         # fWeights = self.__firstHiddenLayer.getWeights()
