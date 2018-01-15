@@ -64,10 +64,11 @@ class ConvLayer(object):
         self.__filterNumber = params['f_number']
         self.__filterDepth = featureDepth
         size = self.__receptiveFieldSize * self.__receptiveFieldSize * self.__filterDepth
+        min, max = params['filter_distribution_interval']
 
         # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
         # and flattened `em to 1 X size * size , further needs
-        self.__features = np.random.uniform(-1, 1, (self.__filterNumber, size))
+        self.__features = np.random.uniform(min, max, (self.__filterNumber, size))
 
         self.__hyperparams = hyperParams
 
