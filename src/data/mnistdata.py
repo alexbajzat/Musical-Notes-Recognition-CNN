@@ -1,4 +1,4 @@
-import mnist
+from mnist import MNIST as mnist
 import numpy as np
 from src.model.LabeledModel import LabeledModel
 
