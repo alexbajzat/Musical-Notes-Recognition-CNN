@@ -119,6 +119,6 @@ def exportModel(layers):
 
     for layer, type in layers:
         layersDef.append(json.dumps(
-            {'type': str(type.name), 'weights': layer.getWeights().tolist()}))
+            {'type': str(type.name), 'weights': layer.getFormattedWeights().tolist()}))
     layersString = ','.join(layersDef)
     file.write('{"layers": [' + layersString + "]}")

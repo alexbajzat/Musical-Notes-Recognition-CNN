@@ -44,6 +44,9 @@ class HiddenLayer(object):
     def getWeights(self):
         return self.__weights
 
+    def getFormattedWeights(self):
+        return self.__weights
+
     def setStepSize(self, newStep):
         self.__hyperparams.stepSize = newStep
 
@@ -117,6 +120,9 @@ class ConvLayer(object):
     def getWeights(self):
         return self.__features
 
+    def getFormattedWeights(self):
+        return self.__features.reshape(self.__filterNumber * self.__filterDepth, self.__receptiveFieldSize, self.__receptiveFieldSize)
+
 
 '''
     layer class which just passes the input thru an activation
@@ -176,6 +182,10 @@ class PoolLayer(object):
     def getWeights(self):
         return np.empty(0)
 
+    def getFormattedWeights(self):
+        return np.empty(0)
+
+
 class REluActivationLayer(object):
     def __init__(self):
         self.__activation = ReLUActivation()
@@ -191,6 +201,9 @@ class REluActivationLayer(object):
     def getWeights(self):
         return np.empty(0)
 
+    def getFormattedWeights(self):
+        return np.empty(0)
+
 
 class FlattenLayer(object):
 
@@ -204,3 +217,5 @@ class FlattenLayer(object):
     def getWeights(self):
         return np.empty(0)
 
+    def getFormattedWeights(self):
+        return np.empty(0)
