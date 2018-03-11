@@ -72,7 +72,6 @@ class ConvLayer(object):
 
         self.__hyperparams = hyperParams
 
-
     '''
             X is an array of pixel matrices
             returns the features map
@@ -174,6 +173,8 @@ class PoolLayer(object):
                             padding=0, stride=self.__stride)
         return dX.reshape(X.shape)
 
+    def getWeights(self):
+        return np.empty(0)
 
 class REluActivationLayer(object):
     def __init__(self):
@@ -187,6 +188,9 @@ class REluActivationLayer(object):
         X = self.__cache
         return self.__activation.derivative(X, gradients)
 
+    def getWeights(self):
+        return np.empty(0)
+
 
 class FlattenLayer(object):
 
@@ -196,3 +200,7 @@ class FlattenLayer(object):
 
     def backprop(self, gradients):
         return gradients.reshape(self.__cache)
+
+    def getWeights(self):
+        return np.empty(0)
+

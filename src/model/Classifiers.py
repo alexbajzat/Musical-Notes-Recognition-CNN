@@ -7,7 +7,6 @@ class SoftMax(object):
 
     # calculates the prediction
     # returns the gradient on scores
-    # todo add regularization
     def compute(self, X, labels, weights):
         inputNumber = X.shape[0]
         # we want to calculate loss using cross-entropy

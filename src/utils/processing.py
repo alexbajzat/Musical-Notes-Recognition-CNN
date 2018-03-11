@@ -3,6 +3,7 @@ from copy import deepcopy
 import numpy as np
 from PIL import Image
 import datetime
+import json
 
 
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
@@ -105,7 +106,19 @@ def exportHistory(export):
         file.write('<tr>')
         file.write('<td>' + str(epoch) + '</td>')
         file.write('<td>' + str(step[0]) + '</td>')
-        file.write('<td>' + str(int(step[1] * 100))+ "%" + '</td>')
+        file.write('<td>' + str(int(step[1] * 100)) + "%" + '</td>')
         file.write('</tr>')
         epoch += 1
     file.write('</table>')
+
+
+def exportModel(layers):
+    now = datetime.datetime.now()
+    file = open('../model-data/' + 'model-' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.json', 'w+')
+    layersDef = []
+
+    for layer, type in layers:
+        layersDef.append(json.dumps(
+            {'type': str(type.name), 'weights': layer.getWeights().tolist()}))
+    layersString = ','.join(layersDef)
+    file.write('{"layers": [' + layersString + "]}")

@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.data.constants import LayerType
-from src.utils.processing import exportPNGs, exportHistory
+from src.utils.processing import exportPNGs, exportHistory, exportModel
 
 
 class Model(object):
@@ -40,14 +40,11 @@ class Model(object):
                 # scores
                 back, loss = self.__classifier.compute(data, batchedLabels, weights)
 
-
-
-
                 # backpropagation
                 for layer, type in reversed(self.__layers):
                     back = layer.backprop(back)
 
-                #validate
+                # validate
                 acc = self.validate(validationSet)
 
                 # keep for later export
@@ -60,6 +57,7 @@ class Model(object):
             if (endBatch >= len(rawData)):
                 break
         self.__saveHistory()
+        self.__saveModel()
 
     def __saveFeatures(self, convLayer):
         filters, number, size, depth = convLayer.getFilters()
@@ -69,8 +67,8 @@ class Model(object):
     def __saveHistory(self):
         exportHistory((self.__history, 'conf'))
 
-
-
+    def __saveModel(self):
+        exportModel(self.__layers)
 
     def validate(self, dataset):
         data = dataset[0]
@@ -85,16 +83,6 @@ class Model(object):
         mean = np.mean(predictedClasses == np.transpose(labels))
         print('training accuracy:', (mean))
         return mean
-
-    def __saveWeights(self, layers):
-        # fWeights = self.__firstHiddenLayer.getWeights()
-        # np.savetxt(X=fWeights, fname='../model-data/f-hidden-layer.txt',
-        #            header=str(fWeights.shape[0]) + ',' + str(fWeights.shape[1]) + '\n')
-        #
-        # sWeights = self.__secondHiddenLayer.getWeights()
-        # np.savetxt(X=fWeights, fname='../model-data/s-hidden-layer.txt',
-        #            header=str(sWeights.shape[0]) + ',' + str(sWeights.shape[1]) + '\n')
-        pass
 
     def predict(self, data):
 
