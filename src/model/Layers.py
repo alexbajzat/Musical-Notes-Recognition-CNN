@@ -28,7 +28,8 @@ class HiddenLayer(object):
 
     def backprop(self, gradients):
         X = self.__cache
-        deltaWeights = np.dot(np.transpose(X), gradients)
+        gradientsAct = self.__activation.derivative(X, gradients)
+        deltaWeights = np.dot(np.transpose(X), gradientsAct)
         deltaBiases = np.sum(gradients, axis=0, keepdims=True)
 
         deltaWeights += self.__weights * self.__hyperparams.regularization
@@ -37,7 +38,7 @@ class HiddenLayer(object):
         self.__biases += - self.__hyperparams.stepSize * deltaBiases
 
         newGradient = np.dot(gradients, np.transpose(self.__weights))
-        return self.__activation.derivative(X, newGradient)
+        return newGradient
 
     def getWeights(self):
         return self.__weights
