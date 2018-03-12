@@ -1,7 +1,5 @@
-from copy import deepcopy
-
+from src.model.Activations import ActivationType, NonActivation
 from src.utils.processing import *
-from src.model.Activations import ReLUActivation
 
 
 class HiddenLayer(object):
@@ -50,6 +48,9 @@ class HiddenLayer(object):
     def setStepSize(self, newStep):
         self.__hyperparams.stepSize = newStep
 
+    def getActivation(self):
+        return self.__activation
+
 
 class ConvLayer(object):
     '''
@@ -60,12 +61,13 @@ class ConvLayer(object):
         features is an array of feature matrices
     '''
 
-    def __init__(self, params, hyperParams, featureDepth=1):
+    def __init__(self, params, hyperParams, activation, featureDepth=1):
         self.__receptiveFieldSize = params['receptiveFieldSize']
         self.__stride = params['stride']
         self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
         self.__filterNumber = params['f_number']
         self.__filterDepth = featureDepth
+        self.__activation = activation
         size = self.__receptiveFieldSize * self.__receptiveFieldSize * self.__filterDepth
         min, max = params['filter_distribution_interval']
 
@@ -90,18 +92,20 @@ class ConvLayer(object):
         # output depth ?
         reshaped = weighted.reshape((self.__filterNumber, X.shape[2], X.shape[3], X.shape[0]))
 
-        self.__cache = deepcopy(X), deepcopy(XCol)
-        return reshaped.transpose(3, 0, 1, 2)
+        transpose = reshaped.transpose(3, 0, 1, 2)
+        self.__cache = deepcopy(X), deepcopy(transpose), deepcopy(XCol)
+
+        return self.__activation.apply(transpose)
 
     '''
         gradients is of size (input_n X filter_n X filter_h X filter_w)  
     '''
 
     def backprop(self, gradients):
-        X, XCol = self.__cache
-
-        # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n) and reshape to (filter_N X filter_h * filter_w & input_n)
-        gradientsReshaped = gradients.transpose(1, 2, 3, 0).reshape(self.__filterNumber, -1)
+        X, XAct, XCol = self.__cache
+        activationBack = self.__activation.derivative(XAct, gradients)
+        # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n) and reshape to (filter_N X filter_h * filter_w * input_n)
+        gradientsReshaped = activationBack.transpose(1, 2, 3, 0).reshape(self.__filterNumber, -1)
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
@@ -121,7 +125,11 @@ class ConvLayer(object):
         return self.__features
 
     def getFormattedWeights(self):
-        return self.__features.reshape(self.__filterNumber * self.__filterDepth, self.__receptiveFieldSize, self.__receptiveFieldSize)
+        return self.__features.reshape(self.__filterNumber * self.__filterDepth, self.__receptiveFieldSize,
+                                       self.__receptiveFieldSize)
+
+    def getActivation(self):
+        return self.__activation
 
 
 '''
@@ -134,6 +142,7 @@ class PoolLayer(object):
         self.__size = size
         self.__stride = stride
         self.__type = type
+        self.__activation = NonActivation()
 
     def forward(self, X):
         # reshape X (merging the feature size and input size) for the im2col
@@ -185,27 +194,13 @@ class PoolLayer(object):
     def getFormattedWeights(self):
         return np.empty(0)
 
-
-class REluActivationLayer(object):
-    def __init__(self):
-        self.__activation = ReLUActivation()
-
-    def forward(self, X):
-        self.__cache = deepcopy(X)
-        return self.__activation.apply(X)
-
-    def backprop(self, gradients):
-        X = self.__cache
-        return self.__activation.derivative(X, gradients)
-
-    def getWeights(self):
-        return np.empty(0)
-
-    def getFormattedWeights(self):
-        return np.empty(0)
+    def getActivation(self):
+        return self.__activation
 
 
 class FlattenLayer(object):
+    def __init__(self):
+        self.__activation = NonActivation()
 
     def forward(self, X):
         self.__cache = X.shape
@@ -219,3 +214,6 @@ class FlattenLayer(object):
 
     def getFormattedWeights(self):
         return np.empty(0)
+
+    def getActivation(self):
+        return self.__activation

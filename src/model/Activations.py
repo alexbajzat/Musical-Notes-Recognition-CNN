@@ -1,14 +1,30 @@
-import numpy as np
+from enum import Enum
 
 ''' 
     ReLU activation i.e. maximum(0, value)
 '''
 
 
-class ReLUActivation(object):
+class ActivationType(Enum):
+    RELU = "ReLU",
+    NONE = "None"
+
+
+class Activation(object):
+    def __init__(self, type):
+        self.__type = type
+
+    def getType(self):
+        return self.__type
+
+
+class ReLUActivation(Activation):
+    def __init__(self):
+        super().__init__(ActivationType.RELU)
+
     # 'forwarding'
     def apply(self, X):
-        X[ X <= 0] = 0
+        X[X <= 0] = 0
         return X
 
     # derivative calculation
@@ -23,7 +39,10 @@ class ReLUActivation(object):
 '''
 
 
-class NonActivation(object):
+class NonActivation(Activation):
+    def __init__(self):
+        super().__init__(ActivationType.NONE)
+
     # 'forwarding'
     def apply(self, X):
         return X
@@ -31,4 +50,3 @@ class NonActivation(object):
     # derivative calculation
     def derivative(self, X, gradients):
         return gradients
-

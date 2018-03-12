@@ -8,7 +8,7 @@ from src.data.mnistdata import initMNISTDataset
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.model.Activations import ReLUActivation, NonActivation
-from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, REluActivationLayer, FlattenLayer
+from src.model.Layers import HiddenLayer, ConvLayer, PoolLayer, FlattenLayer
 from src.NeuralModel import Model
 
 STEP_SIZE = 1e-7
@@ -54,25 +54,17 @@ def doTheStuff(data):
 
     # add `em
 
-    #conv-relu-conv-relu-pool
-    layers.append((ConvLayer(params=fConvparams, hyperParams=hyperParams), LayerType.CONV))
-    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+    # conv-relu-conv-relu-pool
+    layers.append((ConvLayer(params=fConvparams, hyperParams=hyperParams, activation=ReLUActivation()), LayerType.CONV))
     layers.append(
-        (ConvLayer(params=fConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
-    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
-    # layers.append((PoolLayer(), LayerType.POOLING))
+        (ConvLayer(params=fConvparams, hyperParams=hyperParams, activation=ReLUActivation(),
+                   featureDepth=fConvparams['f_number']), LayerType.CONV))
 
     layers.append(
-        (ConvLayer(params=fConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
-    layers.append((REluActivationLayer(), LayerType.ACTIVATION))
+        (ConvLayer(params=fConvparams, hyperParams=hyperParams, activation=ReLUActivation(),
+                   featureDepth=fConvparams['f_number']), LayerType.CONV))
 
-
-    #conv-relu-pool
-    # layers.append(
-    #     (ConvLayer(params=sConvparams, hyperParams=hyperParams, featureDepth=fConvparams['f_number']), LayerType.CONV))
-    # layers.append((REluActivationLayer(), LayerType.ACTIVATION))
     layers.append((PoolLayer(), LayerType.POOLING))
-
     layers.append((FlattenLayer(), LayerType.FLAT))
 
     # watch-out for the input size of the first fully net
@@ -102,7 +94,7 @@ def trainWithMnist():
 
 def train():
     data = initDataset()
-    #todo remove this
+    # todo remove this
     doTheStuff(data[0:50])
 
 
