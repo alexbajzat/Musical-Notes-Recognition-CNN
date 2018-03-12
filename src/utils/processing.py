@@ -109,6 +109,7 @@ def exportHistory(export):
         file.write('<td>' + str(int(step[1] * 100)) + "%" + '</td>')
         file.write('</tr>')
         epoch += 1
+        
     file.write('</table>')
 
 
