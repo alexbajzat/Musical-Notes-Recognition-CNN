@@ -1,11 +1,11 @@
-from mnist import MNIST as mnist
+import mnist
 import numpy as np
 from src.model.LabeledModel import LabeledModel
 
 
 def initMNISTDataset():
     labeledData = []
-    mdata = mnist('data/dataset')
+    mdata = mnist.MNIST('data/dataset')
     imgs, labels = mdata.load_training()
 
     for i in range(1000):

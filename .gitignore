@@ -8,3 +8,4 @@ __pycache__/
 features/
 history/
 model-data/
+venv/

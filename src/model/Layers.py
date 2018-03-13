@@ -1,4 +1,6 @@
-from src.model.Activations import ActivationType, NonActivation
+from copy import deepcopy
+
+from src.model.Activations import NonActivation
 from src.utils.processing import *
 
 
@@ -133,11 +135,6 @@ class ConvLayer(object):
         return self.__activation
 
 
-'''
-    layer class which just passes the input thru an activation
-'''
-
-
 class PoolLayer(object):
     def __init__(self, size=2, stride=2, type='MAX'):
         self.__size = size
@@ -215,6 +212,39 @@ class FlattenLayer(object):
 
     def getFormattedWeights(self):
         return np.empty(0)
+
+    def getActivation(self):
+        return self.__activation
+
+
+'''
+    this does not affect the derivative, only resizes data to be processed
+'''
+
+
+class TestingLayer(object):
+    def __init__(self, inputSize, outputSize):
+        self.__inputSize = inputSize
+        self.__outputSize = outputSize
+        self.__activation = NonActivation()
+
+        # initialize weights and biases
+        # todo weights should be initialized using square root / input size
+        self.__weights = np.random.randn(inputSize, outputSize) * 0.01
+
+    def forward(self, X):
+        result = np.dot(X, self.__weights)
+        return self.__activation.apply(result)
+
+    def backprop(self, gradients):
+        newGradient = np.dot(gradients, np.transpose(self.__weights))
+        return newGradient
+
+    def getWeights(self):
+        return self.__weights
+
+    def getFormattedWeights(self):
+        return self.__weights
 
     def getActivation(self):
         return self.__activation
