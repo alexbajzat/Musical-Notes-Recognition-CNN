@@ -14,7 +14,7 @@ from src.NeuralModel import Model
 STEP_SIZE = 1e-5
 FILTER_STEP_SIZE = 1e-2
 REG = 1e-3
-BATCH_SIZE = 36
+BATCH_SIZE = 32
 
 FULLY_CONNECTED_NEURONS = 1
 LABELS_NUMBER = 10
@@ -45,7 +45,7 @@ def doTheStuff(data):
     validatingDataset = datasetValues[trainingUpperBound:], datasetLabels[trainingUpperBound:]
     hyperParams = HyperParams(STEP_SIZE, REG, FILTER_STEP_SIZE)
 
-    fConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 10
+    fConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 50
         , 'filter_distribution_interval': (-CONV_DISTRIBUTION_INTERVAL, CONV_DISTRIBUTION_INTERVAL)}
 
     # init layers
@@ -78,7 +78,7 @@ def doTheStuff(data):
     classifier = SoftMax(hyperParams)
 
     # model getting trained
-    model = Model(layers, classifier, BATCH_SIZE, iterations=30)
+    model = Model(layers, classifier, BATCH_SIZE, iterations=50)
     model.train(trainingDataset, validatingDataset)
     return model
 
