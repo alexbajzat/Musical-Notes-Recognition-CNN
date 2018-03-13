@@ -17,7 +17,7 @@ REG = 1e-3
 BATCH_SIZE = 36
 
 FULLY_CONNECTED_NEURONS = 1
-LABELS_NUMBER = 7
+LABELS_NUMBER = 10
 CONV_DISTRIBUTION_INTERVAL = 1e-1
 
 
@@ -92,4 +92,4 @@ def train():
     data = initDataset()
     doTheStuff(data)
 
-train()
+trainWithMnist()
