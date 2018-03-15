@@ -5,6 +5,8 @@ from PIL import Image
 import datetime
 import json
 
+from src.data.constants import LayerType
+
 
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
     # First figure out what the size of the output should be
@@ -119,8 +121,15 @@ def exportModel(layers):
     layersDef = []
 
     for layer, type in layers:
+        convParams = None
+        weights = layer.getFormattedWeights().tolist()
+        if (type == LayerType.CONV):
+            convParams = {"stride": layer.getConvParams()}
+        if (type == LayerType.HIDDEN):
+            # on more dimension is needed for hidden layers
+            weights = [weights]
         layersDef.append(json.dumps(
             {'type': str(type.name), 'activation': layer.getActivation().getType().name,
-             'weights': layer.getFormattedWeights().tolist()}))
+             'weights': weights, "convParams": convParams}))
     layersString = ','.join(layersDef)
     file.write('{"layers": [' + layersString + "]}")

@@ -48,9 +48,6 @@ class HiddenLayer(object):
     def getFormattedWeights(self):
         return self.__weights
 
-    def setStepSize(self, newStep):
-        self.__hyperparams.stepSize = newStep
-
     def getActivation(self):
         return self.__activation
 
@@ -133,6 +130,9 @@ class ConvLayer(object):
 
     def getActivation(self):
         return self.__activation
+
+    def getConvParams(self):
+        return {"filterSize": self.__receptiveFieldSize}
 
 
 class PoolLayer(object):
