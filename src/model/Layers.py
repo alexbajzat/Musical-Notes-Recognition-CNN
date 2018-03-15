@@ -51,6 +51,9 @@ class HiddenLayer(object):
     def getActivation(self):
         return self.__activation
 
+    def getBiases(self):
+        return self.__biases
+
 
 class ConvLayer(object):
     '''
@@ -124,6 +127,9 @@ class ConvLayer(object):
     def getWeights(self):
         return self.__features
 
+    def getBiases(self):
+        return np.empty((1, 0))
+
     def getFormattedWeights(self):
         return self.__features.reshape(self.__filterNumber * self.__filterDepth, self.__receptiveFieldSize,
                                        self.__receptiveFieldSize)
@@ -132,7 +138,7 @@ class ConvLayer(object):
         return self.__activation
 
     def getConvParams(self):
-        return {"filterSize": self.__receptiveFieldSize}
+        return {"stride": self.__stride}
 
 
 class PoolLayer(object):
@@ -248,3 +254,6 @@ class TestingLayer(object):
 
     def getActivation(self):
         return self.__activation
+
+    def getBiases(self):
+        return np.empty((1, 0))

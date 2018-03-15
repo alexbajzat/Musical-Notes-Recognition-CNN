@@ -123,13 +123,16 @@ def exportModel(layers):
     for layer, type in layers:
         convParams = None
         weights = layer.getFormattedWeights().tolist()
+        biases = None
         if (type == LayerType.CONV):
-            convParams = {"stride": layer.getConvParams()}
+            convParams = layer.getConvParams()
+            biases = layer.getBiases().tolist()
         if (type == LayerType.HIDDEN):
             # on more dimension is needed for hidden layers
+            biases = layer.getBiases().tolist()
             weights = [weights]
         layersDef.append(json.dumps(
             {'type': str(type.name), 'activation': layer.getActivation().getType().name,
-             'weights': weights, "convParams": convParams}))
+             'weights': weights, "biases": biases, "convParams": convParams}))
     layersString = ','.join(layersDef)
     file.write('{"layers": [' + layersString + "]}")
