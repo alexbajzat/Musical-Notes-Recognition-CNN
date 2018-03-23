@@ -18,7 +18,7 @@ BATCH_SIZE = 32
 
 FULLY_CONNECTED_NEURONS = 1
 LABELS_NUMBER = 10
-CONV_DISTRIBUTION_INTERVAL = 1e-1
+CONV_DISTRIBUTION_INTERVAL = 1e-2
 
 
 def doTheStuff(data):
@@ -45,7 +45,7 @@ def doTheStuff(data):
     validatingDataset = datasetValues[trainingUpperBound:], datasetLabels[trainingUpperBound:]
     hyperParams = HyperParams(STEP_SIZE, REG, FILTER_STEP_SIZE)
 
-    fConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 50
+    fConvparams = {'receptiveFieldSize': 3, 'stride': 1, 'zeroPadding': None, 'f_number': 3
         , 'filter_distribution_interval': (-CONV_DISTRIBUTION_INTERVAL, CONV_DISTRIBUTION_INTERVAL)}
 
     # init layers
@@ -57,8 +57,7 @@ def doTheStuff(data):
     layers.append((ConvLayer(params=fConvparams, hyperParams=hyperParams, activation=ReLUActivation()), LayerType.CONV))
     layers.append(
         (ConvLayer(params=fConvparams, hyperParams=hyperParams, activation=ReLUActivation(),
-                   featureDepth=fConvparams['f_number']), LayerType.CONV))
-
+                   filterDepth=fConvparams['f_number']), LayerType.CONV))
 
     layers.append((PoolLayer(), LayerType.POOLING))
     layers.append((FlattenLayer(), LayerType.FLAT))
@@ -68,17 +67,18 @@ def doTheStuff(data):
 
     # shrink is done with 2^n_of_pools
     poolN = len([t for t in layers if t[1] == LayerType.POOLING])
+    convN = len([t for t in layers if t[1] == LayerType.CONV])
     inputShrink = np.power(2, poolN)
-    fHiddenInput = int(np.power(inputSize / inputShrink, 2) * fConvparams['f_number'])
+    fHiddenInput = int(np.power(inputSize / inputShrink, 2) * np.power(fConvparams['f_number'], convN))
     # fHiddenInput = int(inputSize * inputSize * 1)
     # layers.append((HiddenLayer(fHiddenInput,
     #                            FULLY_CONNECTED_NEURONS, NonActivation(), hyperParams), LayerType.HIDDEN))
-    # layers.append((HiddenLayer(fHiddenInput, LABELS_NUMBER, NonActivation(), hyperParams), LayerType.HIDDEN))
-    layers.append((TestingLayer(fHiddenInput, LABELS_NUMBER), LayerType.HIDDEN))
+    layers.append((HiddenLayer(fHiddenInput, LABELS_NUMBER, NonActivation(), hyperParams), LayerType.HIDDEN))
+    # layers.append((TestingLayer(fHiddenInput, LABELS_NUMBER), LayerType.HIDDEN))
     classifier = SoftMax(hyperParams)
 
     # model getting trained
-    model = Model(layers, classifier, BATCH_SIZE, iterations=50)
+    model = Model(layers, classifier, BATCH_SIZE, iterations=1)
     model.train(trainingDataset, validatingDataset)
     return model
 
@@ -90,6 +90,7 @@ def trainWithMnist():
 
 def train():
     data = initDataset()
-    doTheStuff(data)
+    doTheStuff(data[0:64])
 
-trainWithMnist()
+
+train()
