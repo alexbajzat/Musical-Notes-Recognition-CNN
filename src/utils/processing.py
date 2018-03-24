@@ -115,7 +115,7 @@ def exportHistory(export):
     file.write('</table>')
 
 
-def exportModel(layers):
+def exportModel(layers, prediction):
     now = datetime.datetime.now()
     file = open('../model-data/' + 'model-' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.json', 'w+')
     layersDef = []
@@ -135,4 +135,8 @@ def exportModel(layers):
             {'type': str(type.name), 'activation': layer.getActivation().getType().name,
              'weights': weights, "biases": biases, "convParams": convParams}))
     layersString = ','.join(layersDef)
-    file.write('{"layers": [' + layersString + "]}")
+    sample = {"data" : prediction[0].tolist(), "result": prediction[1].tolist(), "probabilities": prediction[2].tolist()}
+    file.write('{"model": '
+               + '{"layers": [' + layersString + "]}" +
+               ', "sample": ' + str(sample).replace("'", '"') +
+               '}')

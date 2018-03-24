@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import numpy as np
 
 from src.data.constants import LayerType
@@ -56,8 +58,11 @@ class Model(object):
             endBatch = start + self.__batchSize
             if (endBatch >= len(rawData)):
                 break
+
+        # create html report
         self.__saveHistory()
-        self.__saveModel()
+        sample = self.predict(rawData[0])
+        self.__saveModel(sample)
 
     def __saveFeatures(self, convLayer):
         filters, number, size, depth = convLayer.getFilters()
@@ -67,8 +72,8 @@ class Model(object):
     def __saveHistory(self):
         exportHistory((self.__history, 'conf'))
 
-    def __saveModel(self):
-        exportModel(self.__layers)
+    def __saveModel(self, sample):
+        exportModel(self.__layers, sample)
 
     def validate(self, dataset):
         data = dataset[0]
@@ -84,11 +89,22 @@ class Model(object):
         print('training accuracy:', (mean))
         return mean
 
+    '''
+        predict and return 3-uple (data, raw result, probabilities)
+    '''
     def predict(self, data):
+        if data.shape != 3:
+            data = np.expand_dims(data, 1)
 
+        pre = deepcopy(data)
         # forward propagation
         for layer, type in self.__layers:
             data = layer.forward(data)
 
         # predict
-        return np.argmax(data, axis=1)
+        exponentiatedScores = np.exp(data)
+
+        # normalize probabilities
+        probabilites = exponentiatedScores / np.sum(exponentiatedScores, axis=1, keepdims=True)
+
+        return pre, data, probabilites
