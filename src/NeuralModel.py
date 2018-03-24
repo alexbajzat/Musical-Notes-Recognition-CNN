@@ -93,10 +93,11 @@ class Model(object):
         predict and return 3-uple (data, raw result, probabilities)
     '''
     def predict(self, data):
+        pre = deepcopy(data)
+
         if data.shape != 3:
             data = np.expand_dims(data, 1)
 
-        pre = deepcopy(data)
         # forward propagation
         for layer, type in self.__layers:
             data = layer.forward(data)
@@ -107,4 +108,5 @@ class Model(object):
         # normalize probabilities
         probabilites = exponentiatedScores / np.sum(exponentiatedScores, axis=1, keepdims=True)
 
-        return pre, data, probabilites
+        # remove additional useless dim
+        return pre, data[0], probabilites[0]

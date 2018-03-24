@@ -136,7 +136,7 @@ def exportModel(layers, prediction):
              'weights': weights, "biases": biases, "convParams": convParams}))
     layersString = ','.join(layersDef)
     sample = {"data" : prediction[0].tolist(), "result": prediction[1].tolist(), "probabilities": prediction[2].tolist()}
-    file.write('{"model": '
-               + '{"layers": [' + layersString + "]}" +
+    file.write('{"model": {'
+               + '"layers": [' + layersString + "]" +
                ', "sample": ' + str(sample).replace("'", '"') +
-               '}')
+               '} }')
