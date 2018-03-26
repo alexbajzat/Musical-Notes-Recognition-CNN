@@ -64,12 +64,11 @@ class ConvLayer(object):
         features is an array of feature matrices
     '''
 
-    def __init__(self, params, hyperParams, activation, filterDepth=1):
-        self.__receptiveFieldSize = params['receptiveFieldSize']
+    def __init__(self, params, hyperParams, activation):
+        self.__receptiveFieldSize = params['receptive_field_size']
         self.__stride = params['stride']
         self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
-        self.__filterNumber = params['f_number']
-        self.__filterDepth = filterDepth
+        self.__filterNumber = params['filter_number']
         self.__activation = activation
         size = self.__receptiveFieldSize * self.__receptiveFieldSize
         min, max = params['filter_distribution_interval']
@@ -93,7 +92,7 @@ class ConvLayer(object):
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
         # using magic padding
         # output depth ?
-        reshaped = weighted.reshape((self.__filterNumber * self.__filterDepth, X.shape[2], X.shape[3], X.shape[0]))
+        reshaped = weighted.reshape((self.__filterNumber * X.shape[1], X.shape[2], X.shape[3], X.shape[0]))
 
         transpose = reshaped.transpose(3, 0, 1, 2)
         self.__cache = deepcopy(X), deepcopy(transpose), deepcopy(XCol)
@@ -122,7 +121,7 @@ class ConvLayer(object):
         return dX
 
     def getFilters(self):
-        return self.__filters, self.__filterNumber, self.__receptiveFieldSize, self.__filterDepth
+        return self.__filters, self.__filterNumber, self.__receptiveFieldSize
 
     def getWeights(self):
         return self.__filters
