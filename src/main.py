@@ -39,17 +39,15 @@ def doTheStuff(data):
 
 
     layersBuilder = LayersBuilder()
-    layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation' : ReLUActivation() , 'stride': 1, 'zero_padding': 0
-        , 'filter_number': 5, 'filter_distribution_interval': (-1e-1, 1e-1)}))
     layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': NonActivation(), 'stride': 1, 'zero_padding': 0
-        , 'filter_number': 10, 'filter_distribution_interval': (-1e-1, 1e-1)}))
+        , 'filter_number': 20, 'filter_distribution_interval': (-1e-1, 1e-1)}))
     layersBuilder.addLayer((LayerType.POOLING, {}))
     layersBuilder.addLayer((LayerType.FLAT, {}))
-    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
-    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
+    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : ReLUActivation()}))
+    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : ReLUActivation()}))
 
     STEP_SIZE = 1e-5
-    FILTER_STEP_SIZE = 1e-2
+    FILTER_STEP_SIZE = 1e-4
     REG = 1e-3
 
     hyperParams = HyperParams(STEP_SIZE, REG, FILTER_STEP_SIZE)
