@@ -9,16 +9,19 @@ class LayersBuilder(object):
     def addLayer(self, config):
         self.__layersConfig.append(config)
 
-    def build(self, hyperParams, inputDimensions,  fullyConnectedN, outputClasesN):
+    def build(self, hyperParams, inputDimensions, fullyConnectedN, outputClasesN):
         totalDepth = 1
         poolingN = 0
-        hiddenLayerPresent =False
+        hiddenN = 0
+        hiddenLayerPresent = False
 
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
                 totalDepth *= config[1]['filter_number']
             if config[0] == LayerType.POOLING:
                 poolingN += 1
+            if config[0] == LayerType.HIDDEN:
+                hiddenN += 1
 
         layers = []
         for config in self.__layersConfig:
@@ -39,7 +42,11 @@ class LayersBuilder(object):
                                                fullyConnectedN, config[1]['activation'], hyperParams),
                                    LayerType.HIDDEN))
                     hiddenLayerPresent = True
+                elif hiddenN > 1:
+                    layers.append((HiddenLayer(fullyConnectedN, fullyConnectedN, config[1]['activation'], hyperParams),
+                                   LayerType.HIDDEN))
                 else:
                     layers.append((HiddenLayer(fullyConnectedN, outputClasesN, config[1]['activation'], hyperParams),
                                    LayerType.HIDDEN))
+                hiddenN -= 1
         return layers
