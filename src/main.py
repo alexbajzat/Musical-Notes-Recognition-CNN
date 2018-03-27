@@ -6,7 +6,7 @@ from src.NeuralModel import Model
 from src.data.Setup import initDataset, Constants
 from src.data.constants import LayerType
 from src.data.mnistdata import initMNISTDataset
-from src.model.Activations import ReLUActivation, NonActivation
+from src.model.Activations import NonActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.model.LayersBuilder import LayersBuilder
@@ -36,20 +36,22 @@ def doTheStuff(data):
     # construct layers
     layersBuilder = LayersBuilder()
     layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': NonActivation(), 'stride': 1, 'zero_padding': 0
-        , 'filter_number': 20, 'filter_distribution_interval': (-1e-2, 1e-2)}))
-    layersBuilder.addLayer((LayerType.POOLING, {}))
+        , 'filter_number': 20, 'filter_distribution_interval': (-1e-4, 1e-4)}))
+    # layersBuilder.addLayer((LayerType.POOLING, {}))
     layersBuilder.addLayer((LayerType.FLAT, {}))
-    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : ReLUActivation()}))
-    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
+    # layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : ReLUActivation()}))
+    # layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
+    layersBuilder.addLayer((LayerType.TEST, {}))
+
 
     # training params
     STEP_SIZE = 1e-4
-    FILTER_STEP_SIZE = 1e-2
+    FILTER_STEP_SIZE = 1e-5
     REG = 1e-3
-    hyperParams = HyperParams(STEP_SIZE, REG, FILTER_STEP_SIZE)
+    hyperParams = HyperParams(STEP_SIZE, FILTER_STEP_SIZE, REG)
 
     # build layers and model
-    layers = layersBuilder.build(hyperParams, inputDims, 50, 7)
+    layers = layersBuilder.build(hyperParams, inputDims, 50, 10)
     model = Model(layers, SoftMax(hyperParams), BATCH_SIZE, iterations=50)
 
 
@@ -68,4 +70,4 @@ def train():
     doTheStuff(data)
 
 
-train()
+trainWithMnist()

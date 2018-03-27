@@ -1,5 +1,5 @@
 from src.data.constants import LayerType
-from src.model.Layers import ConvLayer, PoolLayer, FlattenLayer, np, HiddenLayer
+from src.model.Layers import ConvLayer, PoolLayer, FlattenLayer, np, HiddenLayer, TestingLayer
 
 
 class LayersBuilder(object):
@@ -23,6 +23,9 @@ class LayersBuilder(object):
             if config[0] == LayerType.HIDDEN:
                 hiddenN += 1
 
+        inputShrink = np.power(2, poolingN)
+        fHiddenInput = int(inputDimensions[0] * inputDimensions[1] / np.power(inputShrink, 2) * totalDepth)
+
         layers = []
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
@@ -36,8 +39,7 @@ class LayersBuilder(object):
                 layers.append((FlattenLayer(), LayerType.FLAT))
             elif config[0] == LayerType.HIDDEN:
                 if not hiddenLayerPresent:
-                    inputShrink = np.power(2, poolingN)
-                    fHiddenInput = int(inputDimensions[0] * inputDimensions[1] / np.power(inputShrink, 2) * totalDepth)
+
                     layers.append((HiddenLayer(fHiddenInput,
                                                fullyConnectedN, config[1]['activation'], hyperParams),
                                    LayerType.HIDDEN))
@@ -49,4 +51,6 @@ class LayersBuilder(object):
                     layers.append((HiddenLayer(fullyConnectedN, outputClasesN, config[1]['activation'], hyperParams),
                                    LayerType.HIDDEN))
                 hiddenN -= 1
+            elif config[0] == LayerType.TEST:
+                layers.append((TestingLayer(fHiddenInput,outputClasesN), LayerType.TEST))
         return layers

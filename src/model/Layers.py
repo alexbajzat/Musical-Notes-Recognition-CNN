@@ -1,5 +1,3 @@
-from copy import deepcopy
-
 from src.model.Activations import NonActivation
 from src.utils.processing import *
 
@@ -74,7 +72,7 @@ class ConvLayer(object):
 
         # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
         # and flattened `em to 1 X size * size , further needs
-        self.__filters = np.random.uniform(min, max, (self.__filterNumber, size))
+        self.__filters = np.random.uniform(min, max, (self.__filterNumber, 1, size))
 
         self.__hyperparams = hyperParams
 
@@ -110,6 +108,8 @@ class ConvLayer(object):
 
         # calculate gradients on feature
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
+        dFeatures = np.reshape(dFeatures, self.__filters.shape)
+
         self.__filters += -self.__hyperparams.featureStepSize * dFeatures
 
         # calculate gradients on input
@@ -206,7 +206,7 @@ class FlattenLayer(object):
 
     def forward(self, X):
         self.__cache = X.shape
-        return X.reshape(X.shape[0] , -1)
+        return X.reshape(X.shape[0], -1)
 
     def backprop(self, gradients):
         return gradients.reshape(self.__cache)
