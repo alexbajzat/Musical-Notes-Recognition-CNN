@@ -103,7 +103,8 @@ class ConvLayer(object):
     def backprop(self, gradients):
         X, XAct, XCol = self.__cache
         activationBack = self.__activation.derivative(XAct, gradients)
-        # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n) and reshape to (filter_N X filter_h * filter_w * input_n)
+        # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n)
+        # and reshape to (filter_N X filter_h * filter_w * input_n)
         gradientsReshaped = activationBack.transpose(1, 2, 3, 0).reshape(self.__filterNumber, -1)
 
         # calculate gradients on feature

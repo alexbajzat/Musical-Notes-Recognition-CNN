@@ -1,8 +1,10 @@
-from PIL import Image
-from src.model.LabeledModel import LabeledModel
 from os import listdir
 from os.path import isfile
+
 import numpy as np
+from PIL import Image
+
+from src.model.LabeledModel import LabeledModel
 
 
 class Constants(object):
@@ -21,18 +23,30 @@ class Constants(object):
 def initDataset():
     labeledData = []
     for folder in listdir(Constants.DATASET_ROOT):
+        addedAugmented = False
         for filename in listdir(Constants.DATASET_ROOT + folder):
+            if not addedAugmented:
+                for filename in listdir(Constants.DATASET_ROOT + folder + '/output'):
+                    url = Constants.DATASET_ROOT + folder + '/output' + "/" + filename
+                    doFileParsing(url, labeledData, folder)
+            addedAugmented = True
+        else:
             url = Constants.DATASET_ROOT + folder + "/" + filename
-            print(url)
-            if (isfile(url)):
-                print('loading file: ' + url)
-                img = Image.open(url).convert('L')
-                img = img.resize(Constants.PROCESSED_RESIZE, Image.ANTIALIAS)
-                img = np.asarray(img.getdata()).reshape(img.size[0], img.size[1])
-                # add formal grayscale channel
-                img = np.expand_dims(img, 0)
-                labeledData.append(LabeledModel(img, folder))
+            doFileParsing(url, labeledData, folder)
+
+
     return labeledData
+
+
+def doFileParsing(url, dataset, identifier):
+    if (isfile(url)):
+        print('loading file: ' + url)
+        img = Image.open(url).convert('L')
+        img = img.resize(Constants.PROCESSED_RESIZE, Image.ANTIALIAS)
+        img = np.asarray(img.getdata()).reshape(img.size[0], img.size[1])
+        # add formal grayscale channel
+        img = np.expand_dims(img, 0)
+        dataset.append(LabeledModel(img, identifier))
 
 
 def loadImages():

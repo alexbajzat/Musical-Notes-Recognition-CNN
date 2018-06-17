@@ -9,7 +9,7 @@ class SoftMax(object):
     # returns the gradient on scores
     def compute(self, X, labels, weights):
         inputNumber = X.shape[0]
-        # we want to calculate loss using cross-entropy
+        # we want to calculate loss usi ng cross-entropy
         # calculate the probabilities of class
         exponentiatedScores = np.exp(X)
 

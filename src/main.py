@@ -6,10 +6,11 @@ from src.NeuralModel import Model
 from src.data.Setup import initDataset, Constants
 from src.data.constants import LayerType
 from src.data.mnistdata import initMNISTDataset
-from src.model.Activations import NonActivation
+from src.model.Activations import NonActivation, ReLUActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.model.LayersBuilder import LayersBuilder
+from src.utils.processing import augmentateDataset
 
 
 def doTheStuff(data):
@@ -35,24 +36,28 @@ def doTheStuff(data):
 
     # construct layers
     layersBuilder = LayersBuilder()
-    layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': NonActivation(), 'stride': 1, 'zero_padding': 0
-        , 'filter_number': 20, 'filter_distribution_interval': (-1e-4, 1e-4)}))
+    layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': ReLUActivation()
+        , 'stride': 1, 'zero_padding': 0, 'filter_number': 15
+        , 'filter_distribution_interval': (-1e-4, 1e-4)}))
+    layersBuilder.addLayer((LayerType.POOLING, {}))
+    # layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': ReLUActivation()
+    #     , 'stride': 1, 'zero_padding': 0, 'filter_number': 10
+    #     , 'filter_distribution_interval': (-1e-4, 1e-4)}))
     # layersBuilder.addLayer((LayerType.POOLING, {}))
     layersBuilder.addLayer((LayerType.FLAT, {}))
-    # layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : ReLUActivation()}))
-    # layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
-    layersBuilder.addLayer((LayerType.TEST, {}))
+    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : ReLUActivation()}))
+    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
 
 
     # training params
-    STEP_SIZE = 1e-4
-    FILTER_STEP_SIZE = 1e-5
+    STEP_SIZE = 1e-3
+    FILTER_STEP_SIZE = 1e-3
     REG = 1e-3
     hyperParams = HyperParams(STEP_SIZE, FILTER_STEP_SIZE, REG)
 
     # build layers and model
-    layers = layersBuilder.build(hyperParams, inputDims, 50, 10)
-    model = Model(layers, SoftMax(hyperParams), BATCH_SIZE, iterations=50)
+    layers = layersBuilder.build(hyperParams, inputDims, 100, 7)
+    model = Model(layers, SoftMax(hyperParams), BATCH_SIZE, iterations=70)
 
 
     # model getting trained
@@ -69,5 +74,7 @@ def train():
     data = initDataset()
     doTheStuff(data)
 
+def augmentate():
+    augmentateDataset()
 
-trainWithMnist()
+train()

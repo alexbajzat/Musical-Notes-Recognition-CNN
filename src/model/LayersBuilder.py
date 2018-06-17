@@ -14,7 +14,6 @@ class LayersBuilder(object):
         poolingN = 0
         hiddenN = 0
         hiddenLayerPresent = False
-
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
                 totalDepth *= config[1]['filter_number']
@@ -22,10 +21,8 @@ class LayersBuilder(object):
                 poolingN += 1
             if config[0] == LayerType.HIDDEN:
                 hiddenN += 1
-
         inputShrink = np.power(2, poolingN)
         fHiddenInput = int(inputDimensions[0] * inputDimensions[1] / np.power(inputShrink, 2) * totalDepth)
-
         layers = []
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
@@ -34,12 +31,10 @@ class LayersBuilder(object):
                                LayerType.CONV))
             elif config[0] == LayerType.POOLING:
                 layers.append((PoolLayer(), LayerType.POOLING))
-
             elif config[0] == LayerType.FLAT:
                 layers.append((FlattenLayer(), LayerType.FLAT))
             elif config[0] == LayerType.HIDDEN:
                 if not hiddenLayerPresent:
-
                     layers.append((HiddenLayer(fHiddenInput,
                                                fullyConnectedN, config[1]['activation'], hyperParams),
                                    LayerType.HIDDEN))

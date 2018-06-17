@@ -1,13 +1,19 @@
 from copy import deepcopy
+from os import listdir
 
+import Augmentor
 import numpy as np
 from PIL import Image
 import datetime
 import json
 
+from src.data.Setup import Constants
 from src.data.constants import LayerType
 
-
+'''
+I do not own this '
+taken from: https://github.com/huyouare/CS231n/blob/master/assignment2/cs231n/im2col.py
+'''
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
     # First figure out what the size of the output should be
     N, C, H, W = x_shape
@@ -140,3 +146,13 @@ def exportModel(layers, prediction):
                + '"layers": [' + layersString + "]" +
                ', "sample": ' + str(sample).replace("'", '"') +
                '} }')
+
+def augmentateDataset():
+    for folder in listdir(Constants.DATASET_ROOT):
+        p = Augmentor.Pipeline(Constants.DATASET_ROOT + folder)
+        p.rotate(probability=0.7, max_left_rotation=10, max_right_rotation=10)
+        p.flip_left_right(probability=0.5)
+        p.random_brightness(0.6, 0.3, 0.8)
+        p.scale(0.4, 1.6)
+        p.sample(400)
+
