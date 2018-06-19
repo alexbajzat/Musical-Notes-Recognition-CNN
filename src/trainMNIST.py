@@ -1,7 +1,8 @@
 from src.NeuralModel import Model
-from src.data.Setup import initDataset, batch
+from src.data.Setup import batch
 from src.data.constants import LayerType
-from src.model.Activations import NonActivation, ReLUActivation
+from src.data.mnistdata import initMNISTDataset
+from src.model.Activations import ReLUActivation, NonActivation
 from src.model.Classifiers import SoftMax
 from src.model.HyperParams import HyperParams
 from src.model.LayersBuilder import LayersBuilder
@@ -10,6 +11,7 @@ from src.model.LayersBuilder import LayersBuilder
 def doTheStuff(data):
     trainingDataset, validatingDataset, inputDims, batchSize = batch(data, 32)
 
+
     # construct layers
     layersBuilder = LayersBuilder()
     layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': ReLUActivation()
@@ -17,9 +19,8 @@ def doTheStuff(data):
         , 'filter_distribution_interval': (-1e-2, 1e-2)}))
     layersBuilder.addLayer((LayerType.POOLING, {}))
     layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': ReLUActivation()
-        , 'stride': 1, 'zero_padding': 0, 'filter_number': 5
+        , 'stride': 1, 'zero_padding': 0, 'filter_number': 10
         , 'filter_distribution_interval': (-1e-2, 1e-2)}))
-    layersBuilder.addLayer((LayerType.POOLING, {}))
     layersBuilder.addLayer((LayerType.POOLING, {}))
     layersBuilder.addLayer((LayerType.FLAT, {}))
     layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
@@ -33,7 +34,7 @@ def doTheStuff(data):
     hyperParams = HyperParams(STEP_SIZE, FILTER_STEP_SIZE, REG)
 
     # build layers and model
-    layers = layersBuilder.build(hyperParams, inputDims, 100, 7)
+    layers = layersBuilder.build(hyperParams, inputDims, 100, 10)
     model = Model(layers, SoftMax(hyperParams), batchSize, iterations=70)
 
 
@@ -41,8 +42,10 @@ def doTheStuff(data):
     model.train(trainingDataset, validatingDataset)
     return model
 
-def train():
-    data = initDataset()
+
+
+def trainWithMnist():
+    data = initMNISTDataset()
     doTheStuff(data)
 
-train()
+trainWithMnist()

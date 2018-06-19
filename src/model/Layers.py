@@ -17,7 +17,7 @@ class HiddenLayer(object):
         self.__hyperparams = hyperparams
 
         # initialize weights and biases
-        self.__weights = np.random.randn(inputSize, outputSize) * 0.01
+        self.__weights = np.random.randn(inputSize, outputSize) * 1e-1
         self.__biases = np.zeros((1, outputSize)) + 0.01
 
     def forward(self, X):
