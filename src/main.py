@@ -1,48 +1,71 @@
-from src.neural_model import Model
-from src.data.setup import initDataset, batch
+import os
+
 from src.data.constants import LayerType
-from src.model.activations import NonActivation, ReLUActivation
+from src.data.setup import initDataset, batch, Constants
 from src.model.classifiers import SoftMax
 from src.model.hyper_params import HyperParams
 from src.model.layers_builder import LayersBuilder
+from src.neural_model import Model
+from src.utils.processing import parseJSON
+
+MANDATORY_FOLDERS = ['dataset', 'requests']
+GENERABLE_FOLDES = ['history', 'model-data', 'features']
 
 
-def doTheStuff(data):
-    trainingDataset, validatingDataset, inputDims, batchSize = batch(data, 32)
-
-    # construct layers
+def constructModel(requestJSON, data):
+    request = parseJSON(requestJSON)
     layersBuilder = LayersBuilder()
-    layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': ReLUActivation()
-        , 'stride': 1, 'zero_padding': 0, 'filter_number': 10
-        , 'filter_distribution_interval': (-1e-2, 1e-2)}))
-    layersBuilder.addLayer((LayerType.POOLING, {}))
-    layersBuilder.addLayer((LayerType.CONV, {'receptive_field_size': 3, 'activation': ReLUActivation()
-        , 'stride': 1, 'zero_padding': 0, 'filter_number': 5
-        , 'filter_distribution_interval': (-1e-2, 1e-2)}))
-    layersBuilder.addLayer((LayerType.POOLING, {}))
-    layersBuilder.addLayer((LayerType.POOLING, {}))
-    layersBuilder.addLayer((LayerType.FLAT, {}))
-    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
-    layersBuilder.addLayer((LayerType.HIDDEN, {'activation' : NonActivation()}))
+    trainingDataset, validatingDataset, inputDims, batchSize = batch(data, request.model.training_params.batch_size)
 
+    hyperParams = HyperParams(request.model.training_params.step_size, request.model.training_params.filter_step_size,
+                              request.model.training_params.regularization)
+    iterations = request.model.training_params.iterations
+    number_of_classes = request.model.training_params.number_of_classes
 
-    # training params
-    STEP_SIZE = 1e-4
-    FILTER_STEP_SIZE = 1e-4
-    REG = 1e-2
-    hyperParams = HyperParams(STEP_SIZE, FILTER_STEP_SIZE, REG)
+    for layer in request.model.layers:
+        layersBuilder.addLayer((LayerType[layer.layer_type], layer.params))
 
     # build layers and model
-    layers = layersBuilder.build(hyperParams, inputDims, 100, 7)
-    model = Model(layers, SoftMax(hyperParams), batchSize, iterations=70)
+    constructed = layersBuilder.build(hyperParams, inputDims, request.model.training_params.hidden_layer_size, number_of_classes)
+    return Model(constructed, SoftMax(hyperParams), batchSize, iterations=iterations,
+                 modelConfig=requestJSON), trainingDataset, validatingDataset
 
 
+def doTheStuff(data, requestJSON):
+    model, trainingData, validationData = constructModel(requestJSON, data)
+
+    print("\n --- START TRAINING --- \n")
     # model getting trained
-    model.train(trainingDataset, validatingDataset)
+    model.train(trainingData, validationData)
     return model
+
 
 def train():
     data = initDataset()
-    doTheStuff(data)
+    displayAvailableRequests()
+    req = input('Request name: ')
+    file = open(Constants.REQUESTS_ROOT + '/' + req)
+    doTheStuff(data, file.read())
 
+
+def displayAvailableRequests():
+    print('Requests: ')
+    for filename in os.listdir(Constants.REQUESTS_ROOT):
+        print(filename, '\n')
+
+def checkSystem():
+    print('Checking system...')
+    for folder in MANDATORY_FOLDERS:
+        if (not os.path.exists(Constants.ROOT + '/' + folder)):
+            raise Exception('Please create folder structure: ' + folder)
+
+    for folder in GENERABLE_FOLDES:
+        url = Constants.ROOT + '/' + folder
+        if (not os.path.exists(url)):
+            os.mkdir(url)
+    print('System check done successfully')
+
+
+
+checkSystem()
 train()

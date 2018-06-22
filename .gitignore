@@ -6,8 +6,10 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-features/
-history/
-dataset/processed/*/output
-model-data/
+resources/dataset/
+resources/requests/
+resources/features/
+resources/history/
+resources/dataset/processed/*/output
+resources/model-data/
 venv/

@@ -1,19 +1,22 @@
+import datetime
+import json
+from collections import namedtuple
 from copy import deepcopy
 from os import listdir
 
 import Augmentor
 import numpy as np
 from PIL import Image
-import datetime
-import json
 
-from src.data.setup import Constants
 from src.data.constants import LayerType
+from src.data.setup import Constants
 
 '''
 I do not own this '
 taken from: https://github.com/huyouare/CS231n/blob/master/assignment2/cs231n/im2col.py
 '''
+
+
 def get_im2col_indices(x_shape, field_height, field_width, padding=1, stride=1):
     # First figure out what the size of the output should be
     N, C, H, W = x_shape
@@ -93,7 +96,8 @@ def exportPNGs(featured, opType):
         resized = grayscale.resize((100, 100))
         now = datetime.datetime.now()
         resized.save(
-            '../features/' + str(now.strftime("%Y-%m-%d-%Hhh%Mmm")) + '-' + opType + "-" + str(id(img)) + '.png')
+            Constants.FEATURES_ROOT + '/' + str(now.strftime("%Y-%m-%d-%Hhh%Mmm")) + '-' + opType + "-" + str(
+                id(img)) + '.png')
 
 
 '''
@@ -101,12 +105,14 @@ def exportPNGs(featured, opType):
 '''
 
 
-def exportHistory(export):
-    history, configuration = export
+def exportHistory(export, modelJSON):
+    history = export
     now = datetime.datetime.now()
-    file = open('../history/' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.html', 'w+')
+    file = open(Constants.HISTORY_ROOT + '/' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.html', 'w+')
 
     file.write('<h2> configuration </h2>')
+    file.write(modelJSON)
+    file.write('<br>')
     file.write('<table style="border:1px solid black;" cellpadding="10">')
     file.write('<tr><th>EPOCH</th><th>LOSS</th><th>ACCURACY</th></tr>')
     epoch = 1
@@ -123,7 +129,7 @@ def exportHistory(export):
 
 def exportModel(layers, prediction):
     now = datetime.datetime.now()
-    file = open('../model-data/' + 'model-' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.json', 'w+')
+    file = open(Constants.MODEL_ROOT + '/' + 'model-' + str(now.strftime("%Y-%m-%d-%H-%M")) + '.json', 'w+')
     layersDef = []
 
     for layer, type in layers:
@@ -141,11 +147,12 @@ def exportModel(layers, prediction):
             {'type': str(type.name), 'activation': layer.getActivation().getType().name,
              'weights': weights, "biases": biases, "convParams": convParams}))
     layersString = ','.join(layersDef)
-    sample = {"data" : prediction[0].tolist(), "result": prediction[1].tolist(), "probabilities": prediction[2].tolist()}
+    sample = {"data": prediction[0].tolist(), "result": prediction[1].tolist(), "probabilities": prediction[2].tolist()}
     file.write('{"model": {'
                + '"layers": [' + layersString + "]" +
                ', "sample": ' + str(sample).replace("'", '"') +
                '} }')
+
 
 def augmentateDataset(samples):
     for folder in listdir(Constants.DATASET_ROOT):
@@ -156,3 +163,6 @@ def augmentateDataset(samples):
         p.scale(0.4, 1.6)
         p.sample(samples)
 
+
+def parseJSON(jsonValue):
+    return json.loads(jsonValue, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))

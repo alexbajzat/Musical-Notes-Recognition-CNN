@@ -1,1 +1,0 @@
-multi-output layer (pt clasificare multipla) in loc de array - matrix 2d

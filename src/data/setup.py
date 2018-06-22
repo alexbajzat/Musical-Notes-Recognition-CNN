@@ -1,6 +1,6 @@
+import random
 from os import listdir
 from os.path import isfile
-import random
 
 import numpy as np
 from PIL import Image
@@ -9,9 +9,12 @@ from src.model.labeled_model import LabeledModel
 
 
 class Constants(object):
-    DATASET_ROOT = '../dataset/processed/'
-    REAL_SET_ROOT = '../images'
-    MODEL_ROOT ='../model-data'
+    ROOT = '../resources'
+    DATASET_ROOT = ROOT + '/dataset/processed/'
+    MODEL_ROOT = ROOT + '/model-data'
+    HISTORY_ROOT = ROOT + '/history'
+    FEATURES_ROOT = ROOT + '/features'
+    REQUESTS_ROOT = ROOT + '/requests'
     PROCESSED_RESIZE = 64, 64
     CHANNEL_SIZE = 1
 

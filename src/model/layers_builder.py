@@ -1,9 +1,13 @@
-from collections import namedtuple
+from enum import Enum
 
 from src.data.constants import LayerType
 from src.model.activations import ReLUActivation, NonActivation
 from src.model.layers import ConvLayer, PoolLayer, FlattenLayer, np, HiddenLayer, TestingLayer
-import json
+
+from src.utils.processing import parseJSON
+
+ACTIVATIONS_MAP = {'RELU': ReLUActivation(), "NON": NonActivation()}
+
 
 class LayersBuilder(object):
     def __init__(self):
@@ -19,7 +23,7 @@ class LayersBuilder(object):
         hiddenLayerPresent = False
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
-                totalDepth *= config[1]['filter_number']
+                totalDepth *= config[1].filter_number
             if config[0] == LayerType.POOLING:
                 poolingN += 1
             if config[0] == LayerType.HIDDEN:
@@ -30,7 +34,7 @@ class LayersBuilder(object):
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
                 layers.append((ConvLayer(params=config[1], hyperParams=hyperParams,
-                                         activation=config[1]['activation']),
+                                         activation= ACTIVATIONS_MAP[config[1].activation]),
                                LayerType.CONV))
             elif config[0] == LayerType.POOLING:
                 layers.append((PoolLayer(), LayerType.POOLING))
@@ -39,14 +43,14 @@ class LayersBuilder(object):
             elif config[0] == LayerType.HIDDEN:
                 if not hiddenLayerPresent:
                     layers.append((HiddenLayer(fHiddenInput,
-                                               fullyConnectedN, config[1]['activation'], hyperParams),
+                                               fullyConnectedN, ACTIVATIONS_MAP[config[1].activation], hyperParams),
                                    LayerType.HIDDEN))
                     hiddenLayerPresent = True
                 elif hiddenN > 1:
-                    layers.append((HiddenLayer(fullyConnectedN, fullyConnectedN, config[1]['activation'], hyperParams),
+                    layers.append((HiddenLayer(fullyConnectedN, fullyConnectedN, ACTIVATIONS_MAP[config[1].activation], hyperParams),
                                    LayerType.HIDDEN))
                 else:
-                    layers.append((HiddenLayer(fullyConnectedN, outputClasesN, config[1]['activation'], hyperParams),
+                    layers.append((HiddenLayer(fullyConnectedN, outputClasesN, ACTIVATIONS_MAP[config[1].activation], hyperParams),
                                    LayerType.HIDDEN))
                 hiddenN -= 1
             elif config[0] == LayerType.TEST:
@@ -55,7 +59,7 @@ class LayersBuilder(object):
 
     def reconstruct(self, modelJson):
         layers = []
-        data = json.loads(modelJson, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        data = parseJSON(modelJson)
         for layer in data.model.layers:
             print(layer, '\n')
             if(layer.type == 'CONV'):

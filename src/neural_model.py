@@ -8,11 +8,12 @@ from src.utils.processing import exportPNGs, exportHistory, exportModel
 
 class Model(object):
 
-    def __init__(self, layers, classifier=None, batchSize=None, iterations=100):
+    def __init__(self, layers, classifier=None, batchSize=None, iterations=100, modelConfig=None):
         self.__layers = layers
         self.__batchSize = batchSize
         self.__classifier = classifier
         self.__iterations = iterations
+        self.__modelConfig= modelConfig
         self.__history = []
 
     def train(self, dataset, validationSet):
@@ -70,7 +71,7 @@ class Model(object):
         exportPNGs(parsed, 'filter-conv1')
 
     def __saveHistory(self):
-        exportHistory((self.__history, 'conf'))
+        exportHistory(self.__history, self.__modelConfig)
 
     def __saveModel(self, sample):
         exportModel(self.__layers, sample)

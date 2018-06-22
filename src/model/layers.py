@@ -70,11 +70,11 @@ class ConvLayer(object):
             self.__filters = np.asarray(filters).reshape(len(filters), 1, -1)
             self.__stride = stride
         if (params != None):
-            self.__receptiveFieldSize = params['receptive_field_size']
-            self.__filterNumber = params['filter_number']
-            self.__stride = params['stride']
+            self.__receptiveFieldSize = params.receptive_field_size
+            self.__filterNumber = params.filter_number
+            self.__stride = params.stride
             size = self.__receptiveFieldSize * self.__receptiveFieldSize
-            min, max = params['filter_distribution_interval']
+            min, max = (params.filter_distribution_interval, -1 *params.filter_distribution_interval)
             # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
             # and flattened `em to 1 X size * size , further needs
             self.__filters = np.random.uniform(min, max, (self.__filterNumber, 1, size))
