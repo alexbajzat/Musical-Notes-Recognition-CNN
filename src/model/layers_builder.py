@@ -1,6 +1,9 @@
-from src.data.constants import LayerType
-from src.model.Layers import ConvLayer, PoolLayer, FlattenLayer, np, HiddenLayer, TestingLayer
+from collections import namedtuple
 
+from src.data.constants import LayerType
+from src.model.activations import ReLUActivation, NonActivation
+from src.model.layers import ConvLayer, PoolLayer, FlattenLayer, np, HiddenLayer, TestingLayer
+import json
 
 class LayersBuilder(object):
     def __init__(self):
@@ -49,3 +52,25 @@ class LayersBuilder(object):
             elif config[0] == LayerType.TEST:
                 layers.append((TestingLayer(fHiddenInput,outputClasesN), LayerType.TEST))
         return layers
+
+    def reconstruct(self, modelJson):
+        layers = []
+        data = json.loads(modelJson, object_hook=lambda d: namedtuple('X', d.keys())(*d.values()))
+        for layer in data.model.layers:
+            print(layer, '\n')
+            if(layer.type == 'CONV'):
+                if(layer.activation == 'RELU'):
+                    activation = ReLUActivation()
+                else:
+                    activation = NonActivation()
+                layers.append((ConvLayer(activation=activation, filters=layer.weights, stride=layer.convParams.stride), LayerType.CONV))
+            elif(layer.type == 'POOLING'):
+                layers.append((PoolLayer(), LayerType.POOLING))
+            elif(layer.type == 'FLAT'):
+                layers.append((FlattenLayer(), LayerType.FLAT))
+            elif(layer.type == 'HIDDEN'):
+                layers.append((HiddenLayer(weights=layer.weights, biases=layer.biases), LayerType.FLAT))
+        sampleData= np.asarray(data.model.sample.data)
+        sampleRaw = np.asarray(data.model.sample.result)
+        sampleProbabilities = np.asarray(data.model.sample.probabilities)
+        return layers, (sampleData, sampleRaw, sampleProbabilities)

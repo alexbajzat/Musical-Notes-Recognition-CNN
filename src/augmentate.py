@@ -1,4 +1,4 @@
 from src.utils.processing import augmentateDataset
 
-
-augmentateDataset()
+samples = input('number of samples: ')
+augmentateDataset(int(samples))

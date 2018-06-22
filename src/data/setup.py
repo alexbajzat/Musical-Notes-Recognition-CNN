@@ -5,12 +5,13 @@ import random
 import numpy as np
 from PIL import Image
 
-from src.model.LabeledModel import LabeledModel
+from src.model.labeled_model import LabeledModel
 
 
 class Constants(object):
     DATASET_ROOT = '../dataset/processed/'
     REAL_SET_ROOT = '../images'
+    MODEL_ROOT ='../model-data'
     PROCESSED_RESIZE = 64, 64
     CHANNEL_SIZE = 1
 

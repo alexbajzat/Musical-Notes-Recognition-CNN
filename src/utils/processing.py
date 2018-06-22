@@ -7,7 +7,7 @@ from PIL import Image
 import datetime
 import json
 
-from src.data.Setup import Constants
+from src.data.setup import Constants
 from src.data.constants import LayerType
 
 '''
@@ -147,12 +147,12 @@ def exportModel(layers, prediction):
                ', "sample": ' + str(sample).replace("'", '"') +
                '} }')
 
-def augmentateDataset():
+def augmentateDataset(samples):
     for folder in listdir(Constants.DATASET_ROOT):
         p = Augmentor.Pipeline(Constants.DATASET_ROOT + folder)
         p.rotate(probability=0.7, max_left_rotation=10, max_right_rotation=10)
         p.flip_left_right(probability=0.5)
         p.random_brightness(0.6, 0.3, 0.8)
         p.scale(0.4, 1.6)
-        p.sample(400)
+        p.sample(samples)
 

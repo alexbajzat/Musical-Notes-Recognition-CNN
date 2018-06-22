@@ -1,4 +1,4 @@
-from src.model.Activations import NonActivation
+from src.model.activations import NonActivation
 from src.utils.processing import *
 
 
@@ -10,15 +10,17 @@ class HiddenLayer(object):
     hyperparams bundle of nn parameters and stuff
     '''
 
-    def __init__(self, inputSize, outputSize, activation, hyperparams):
+    def __init__(self, inputSize=None, outputSize=None, activation=NonActivation(), hyperparams=None, weights=None, biases=None):
         self.__inputSize = inputSize
         self.__outputSize = outputSize
         self.__activation = activation
         self.__hyperparams = hyperparams
-
+        self.__weights = np.asarray(weights)
+        self.__biases = np.asarray(biases)
         # initialize weights and biases
-        self.__weights = np.random.randn(inputSize, outputSize) * 1e-1
-        self.__biases = np.zeros((1, outputSize)) + 0.01
+        if (inputSize != None and outputSize != None):
+            self.__weights = np.random.randn(inputSize, outputSize) * 1e-1
+            self.__biases = np.zeros((1, outputSize)) + 0.01
 
     def forward(self, X):
         result = np.dot(X, self.__weights) + self.__biases
@@ -61,20 +63,26 @@ class ConvLayer(object):
         features is an array of feature matrices
     '''
 
-    def __init__(self, params, hyperParams, activation):
-        self.__receptiveFieldSize = params['receptive_field_size']
-        self.__stride = params['stride']
+    def __init__(self, params=None, hyperParams=None, activation=NonActivation(), filters=None, stride=1):
+        if (filters != None):
+            self.__receptiveFieldSize = len(filters[0])
+            self.__filterNumber = len(filters)
+            self.__filters = np.asarray(filters).reshape(len(filters), 1, -1)
+            self.__stride = stride
+        if (params != None):
+            self.__receptiveFieldSize = params['receptive_field_size']
+            self.__filterNumber = params['filter_number']
+            self.__stride = params['stride']
+            size = self.__receptiveFieldSize * self.__receptiveFieldSize
+            min, max = params['filter_distribution_interval']
+            # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
+            # and flattened `em to 1 X size * size , further needs
+            self.__filters = np.random.uniform(min, max, (self.__filterNumber, 1, size))
+
+            self.__hyperparams = hyperParams
+
         self.__zeroPadding = (int)((self.__receptiveFieldSize - 1) / 2)
-        self.__filterNumber = params['filter_number']
         self.__activation = activation
-        size = self.__receptiveFieldSize * self.__receptiveFieldSize
-        min, max = params['filter_distribution_interval']
-
-        # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
-        # and flattened `em to 1 X size * size , further needs
-        self.__filters = np.random.uniform(min, max, (self.__filterNumber, 1, size))
-
-        self.__hyperparams = hyperParams
 
     '''
             X is an array of pixel matrices
@@ -232,14 +240,12 @@ class TestingLayer(object):
         self.__inputSize = inputSize
         self.__outputSize = outputSize
         self.__activation = NonActivation()
-
         # initialize weights and biases
         # todo weights should be initialized using square root / input size
         self.__weights = np.random.randn(inputSize, outputSize) * 0.01
 
     def forward(self, X):
-        result = np.dot(X, self.__weights)
-        return self.__activation.apply(result)
+        return np.dot(X, self.__weights)
 
     def backprop(self, gradients):
         newGradient = np.dot(gradients, np.transpose(self.__weights))

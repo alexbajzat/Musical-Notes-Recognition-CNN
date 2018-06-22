@@ -8,10 +8,10 @@ from src.utils.processing import exportPNGs, exportHistory, exportModel
 
 class Model(object):
 
-    def __init__(self, layers, classifier, batchSize, iterations=100):
+    def __init__(self, layers, classifier=None, batchSize=None, iterations=100):
+        self.__layers = layers
         self.__batchSize = batchSize
         self.__classifier = classifier
-        self.__layers = layers
         self.__iterations = iterations
         self.__history = []
 

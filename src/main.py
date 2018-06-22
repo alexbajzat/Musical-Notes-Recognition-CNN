@@ -1,10 +1,10 @@
-from src.NeuralModel import Model
-from src.data.Setup import initDataset, batch
+from src.neural_model import Model
+from src.data.setup import initDataset, batch
 from src.data.constants import LayerType
-from src.model.Activations import NonActivation, ReLUActivation
-from src.model.Classifiers import SoftMax
-from src.model.HyperParams import HyperParams
-from src.model.LayersBuilder import LayersBuilder
+from src.model.activations import NonActivation, ReLUActivation
+from src.model.classifiers import SoftMax
+from src.model.hyper_params import HyperParams
+from src.model.layers_builder import LayersBuilder
 
 
 def doTheStuff(data):

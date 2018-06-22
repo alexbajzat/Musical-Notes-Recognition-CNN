@@ -1,6 +1,6 @@
 import mnist
 import numpy as np
-from src.model.LabeledModel import LabeledModel
+from src.model.labeled_model import LabeledModel
 
 
 def initMNISTDataset():
