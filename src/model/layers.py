@@ -90,7 +90,8 @@ class ConvLayer(object):
         '''
 
     def forward(self, X):
-        XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
+        XReshaped = X.reshape(X.shape[0] * X.shape[1], 1, X.shape[2], X.shape[2])
+        XCol = im2col_indices(XReshaped, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                               self.__stride)
         weighted = np.dot(self.__filters, XCol)
 
