@@ -24,7 +24,7 @@ class LayersBuilder(object):
         firstConv = True
         for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
-                totalDepth *= config[1].filter_number
+                totalDepth = config[1].filter_number
             if config[0] == LayerType.POOLING:
                 poolingN += 1
             if config[0] == LayerType.HIDDEN:
@@ -33,12 +33,13 @@ class LayersBuilder(object):
         fHiddenInput = int(inputDimensions[0] * inputDimensions[1] / np.power(inputShrink, 2) * totalDepth)
         layers = []
         convDepth = 1
-        for index, config in enumerate(self.__layersConfig):
+        for config in self.__layersConfig:
             if config[0] == LayerType.CONV:
                 if (firstConv):
                     layers.append((ConvLayer(params=config[1], hyperParams=hyperParams,
                                              activation=ACTIVATIONS_MAP[config[1].activation]),
                                    LayerType.CONV))
+                    firstConv = False
                 else:
 
                     layers.append((ConvLayer(params=config[1], hyperParams=hyperParams,

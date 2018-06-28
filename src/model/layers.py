@@ -91,15 +91,15 @@ class ConvLayer(object):
         '''
 
     def forward(self, X):
-        XReshaped = X.reshape(X.shape[0] * X.shape[1], 1, X.shape[2], X.shape[3])
-        XCol = im2col_indices(XReshaped, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
+        # XReshaped = X.reshape(X.shape[0] * X.shape[1], 1, X.shape[2], X.shape[3])
+        XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                               self.__stride)
-        weighted = np.dot(self.__filters, XCol)
+        filters = self.__filters.reshape(self.__filters.shape[0], self.__filters.shape[1] * self.__filters.shape[2])
+        weighted = np.dot(filters, XCol)
 
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
         # using magic padding
-        # output depth ?
-        reshaped = weighted.reshape((self.__filterNumber * X.shape[1], X.shape[2], X.shape[3], X.shape[0]))
+        reshaped = weighted.reshape((self.__filterNumber, X.shape[2], X.shape[3], X.shape[0]))
 
         transpose = reshaped.transpose(3, 0, 1, 2)
         self.__cache = deepcopy(X), deepcopy(transpose), deepcopy(XCol)
