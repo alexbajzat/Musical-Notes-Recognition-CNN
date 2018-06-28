@@ -10,7 +10,8 @@ class HiddenLayer(object):
     hyperparams bundle of nn parameters and stuff
     '''
 
-    def __init__(self, inputSize=None, outputSize=None, activation=NonActivation(), hyperparams=None, weights=None, biases=None):
+    def __init__(self, inputSize=None, outputSize=None, activation=NonActivation(), hyperparams=None, weights=None,
+                 biases=None):
         self.__inputSize = inputSize
         self.__outputSize = outputSize
         self.__activation = activation
@@ -63,7 +64,7 @@ class ConvLayer(object):
         features is an array of feature matrices
     '''
 
-    def __init__(self, params=None, hyperParams=None, activation=NonActivation(), filters=None, stride=1):
+    def __init__(self, params=None, hyperParams=None, activation=NonActivation(), inputDepth=1, filters=None, stride=1):
         if (filters != None):
             self.__receptiveFieldSize = len(filters[0])
             self.__filterNumber = len(filters)
@@ -74,10 +75,10 @@ class ConvLayer(object):
             self.__filterNumber = params.filter_number
             self.__stride = params.stride
             size = self.__receptiveFieldSize * self.__receptiveFieldSize
-            min, max = (params.filter_distribution_interval, -1 *params.filter_distribution_interval)
+            min, max = (params.filter_distribution_interval, -1 * params.filter_distribution_interval)
             # features should be of shape (f_number X 1 X size X size) but I skipped this a bit
             # and flattened `em to 1 X size * size , further needs
-            self.__filters = np.random.uniform(min, max, (self.__filterNumber, 1, size))
+            self.__filters = np.random.uniform(min, max, (self.__filterNumber, inputDepth, size))
 
             self.__hyperparams = hyperParams
 
@@ -90,7 +91,7 @@ class ConvLayer(object):
         '''
 
     def forward(self, X):
-        XReshaped = X.reshape(X.shape[0] * X.shape[1], 1, X.shape[2], X.shape[2])
+        XReshaped = X.reshape(X.shape[0] * X.shape[1], 1, X.shape[2], X.shape[3])
         XCol = im2col_indices(XReshaped, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                               self.__stride)
         weighted = np.dot(self.__filters, XCol)
