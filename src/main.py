@@ -43,7 +43,7 @@ def doTheStuff(data, requestJSON):
 def train():
     data = initDataset()
     displayAvailableRequests()
-    req = input('Request name: ')
+    req = input('\nRequest name: ')
     file = open(Constants.REQUESTS_ROOT + '/' + req)
     doTheStuff(data, file.read())
 

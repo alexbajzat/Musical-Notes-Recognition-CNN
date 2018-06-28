@@ -68,7 +68,9 @@ class ConvLayer(object):
         if (filters != None):
             self.__receptiveFieldSize = len(filters[0])
             self.__filterNumber = len(filters)
-            self.__filters = np.asarray(filters).reshape(len(filters), 1, -1)
+            self.__filters = np.asarray(filters)
+            self.__receptiveFieldSize = self.__filters.shape[2]
+            self.__filters = self.__filters.reshape(self.__filters.shape[0], self.__filters.shape[1], -1)
             self.__stride = stride
         if (params != None):
             self.__receptiveFieldSize = params.receptive_field_size
@@ -140,7 +142,7 @@ class ConvLayer(object):
         return np.empty((1, 0))
 
     def getFormattedWeights(self):
-        return self.__filters.reshape(self.__filterNumber, self.__receptiveFieldSize,
+        return self.__filters.reshape(self.__filters.shape[0],  self.__filters.shape[1] ,self.__receptiveFieldSize,
                                       self.__receptiveFieldSize)
 
     def getActivation(self):
