@@ -140,9 +140,9 @@ def exportModel(layers, prediction):
             convParams = layer.getConvParams()
             biases = layer.getBiases().tolist()
         if (type == LayerType.HIDDEN):
-            # on more dimension is needed for hidden layers
+            # two more dimension is needed for hidden layers
             biases = layer.getBiases().tolist()
-            weights = [weights]
+            weights = [[weights]]
         layersDef.append(json.dumps(
             {'type': str(type.name), 'activation': layer.getActivation().getType().name,
              'weights': weights, "biases": biases, "convParams": convParams}))
