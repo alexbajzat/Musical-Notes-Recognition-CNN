@@ -9,7 +9,7 @@ from src.model.labeled_model import LabeledModel
 
 
 class Constants(object):
-    ROOT = '../resources'
+    ROOT = 'resources'
     DATASET_ROOT = ROOT + '/dataset/processed/'
     MODEL_ROOT = ROOT + '/model-data'
     HISTORY_ROOT = ROOT + '/history'
