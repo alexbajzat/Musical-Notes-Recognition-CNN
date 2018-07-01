@@ -1,5 +1,3 @@
-from enum import Enum
-
 from src.data.constants import LayerType
 from src.model.activations import ReLUActivation, NonActivation
 from src.model.layers import ConvLayer, PoolLayer, FlattenLayer, np, HiddenLayer, TestingLayer
@@ -52,9 +50,14 @@ class LayersBuilder(object):
             elif config[0] == LayerType.FLAT:
                 layers.append((FlattenLayer(), LayerType.FLAT))
             elif config[0] == LayerType.HIDDEN:
-                if not hiddenLayerPresent:
+                if not hiddenLayerPresent and hiddenN != 1:
                     layers.append((HiddenLayer(fHiddenInput,
                                                fullyConnectedN, ACTIVATIONS_MAP[config[1].activation], hyperParams),
+                                   LayerType.HIDDEN))
+                    hiddenLayerPresent = True
+                elif not hiddenLayerPresent and hiddenN == 1:
+                    layers.append((HiddenLayer(fHiddenInput,
+                                               outputClasesN, ACTIVATIONS_MAP[config[1].activation], hyperParams),
                                    LayerType.HIDDEN))
                     hiddenLayerPresent = True
                 elif hiddenN > 1:
