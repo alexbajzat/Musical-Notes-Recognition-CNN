@@ -1,3 +1,4 @@
+from copy import deepcopy
 from enum import Enum
 
 ''' 
@@ -24,14 +25,17 @@ class ReLUActivation(Activation):
 
     # 'forwarding'
     def apply(self, X):
-        X[X <= 0] = 0
-        return X
+        applied = deepcopy(X)
+        applied[applied <= 0] = 0
+        return applied
 
     # derivative calculation
     # threshold the input values to 0 if smaller
-    def derivative(self, X, gradients):
-        gradients[X <= 0] = 0
-        return gradients
+    def derivative(self, X):
+        derivatives = deepcopy(X)
+        derivatives[derivatives <= 0] = 0
+        derivatives[derivatives > 0] = 1
+        return derivatives
 
 
 '''
@@ -45,8 +49,8 @@ class NonActivation(Activation):
 
     # 'forwarding'
     def apply(self, X):
-        return X
+        return deepcopy(X)
 
     # derivative calculation
-    def derivative(self, X, gradients):
-        return gradients
+    def derivative(self, X):
+        return deepcopy(X)

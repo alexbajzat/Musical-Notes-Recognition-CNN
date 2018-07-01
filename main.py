@@ -51,7 +51,7 @@ def train():
 
 
 def displayAvailableRequests():
-    print('Requests: ')
+    print('\nRequests: ')
     for filename in os.listdir(Constants.REQUESTS_ROOT):
         print(filename, '\n')
 

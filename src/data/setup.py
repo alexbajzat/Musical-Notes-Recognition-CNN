@@ -19,12 +19,6 @@ class Constants(object):
     CHANNEL_SIZE = 1
 
 
-''' initializing dataset from root folder
-    the label is given by the directory name
-    root and extension of data must be configured before initialize
-'''
-
-
 def initDataset():
     labeledData = []
     for folder in listdir(Constants.DATASET_ROOT):

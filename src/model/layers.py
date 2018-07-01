@@ -25,12 +25,13 @@ class HiddenLayer(object):
 
     def forward(self, X):
         result = np.dot(X, self.__weights) + self.__biases
-        self.__cache = (deepcopy(X), deepcopy(result))
-        return self.__activation.apply(result)
+        apply = self.__activation.apply(result)
+        self.__cache = (deepcopy(X), deepcopy(apply))
+        return apply
 
     def backprop(self, gradients):
         X, XActivated = self.__cache
-        gradientsAct = self.__activation.derivative(XActivated, gradients)
+        gradientsAct = self.__activation.derivative(gradients)
         deltaWeights = np.dot(np.transpose(X), gradientsAct)
         deltaBiases = np.sum(gradients, axis=0, keepdims=True)
 
@@ -100,21 +101,23 @@ class ConvLayer(object):
         weighted = np.dot(filters, XCol)
 
         # reshape is done assuming that after the conv, the feature maps keep the dims of the input
-        # using magic padding
         reshaped = weighted.reshape((self.__filterNumber, X.shape[2], X.shape[3], X.shape[0]))
 
-        transpose = reshaped.transpose(3, 0, 1, 2)
-        self.__cache = deepcopy(X), deepcopy(transpose), deepcopy(XCol)
+        transpose = reshaped.transpose((3, 0, 1, 2))
 
-        return self.__activation.apply(transpose)
+        apply = self.__activation.apply(transpose)
+        self.__cache = deepcopy(X), deepcopy(apply), deepcopy(XCol), deepcopy(transpose)
+
+        return apply
 
     '''
         gradients is of size (input_n X filter_n X filter_h X filter_w)  
     '''
 
     def backprop(self, gradients):
-        X, XAct, XCol = self.__cache
-        activationBack = self.__activation.derivative(XAct, gradients)
+        X, XAct, XCol, XWeighted = self.__cache
+        activationBack = self.__activation.derivative(gradients)
+
         # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n)
         # and reshape to (filter_N X filter_h * filter_w * input_n)
         gradientsReshaped = activationBack.transpose(1, 2, 3, 0).reshape(self.__filterNumber, -1)
