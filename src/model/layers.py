@@ -26,21 +26,24 @@ class HiddenLayer(object):
     def forward(self, X):
         result = np.dot(X, self.__weights) + self.__biases
         apply = self.__activation.apply(result)
-        self.__cache = (deepcopy(X), deepcopy(apply))
+        self.__cache = (deepcopy(X), deepcopy(result), deepcopy(apply))
         return apply
 
     def backprop(self, gradients):
-        X, XActivated = self.__cache
-        gradientsAct = self.__activation.derivative(gradients)
+        X, XWeighted,  XActivated = self.__cache
+
+        gradientsAct = self.__activation.derivative(XWeighted, gradients)
+
         deltaWeights = np.dot(np.transpose(X), gradientsAct)
         deltaBiases = np.sum(gradients, axis=0, keepdims=True)
 
-        deltaWeights += self.__weights * self.__hyperparams.regularization
+        # deltaWeights += self.__weights * self.__hyperparams.regularization
+
+        newGradient = np.dot(gradientsAct, np.transpose(self.__weights))
 
         self.__weights += - self.__hyperparams.stepSize * deltaWeights
         self.__biases += - self.__hyperparams.stepSize * deltaBiases
 
-        newGradient = np.dot(gradients, np.transpose(self.__weights))
         return newGradient
 
     def getWeights(self):
@@ -97,13 +100,16 @@ class ConvLayer(object):
         # XReshaped = X.reshape(X.shape[0] * X.shape[1], 1, X.shape[2], X.shape[3])
         XCol = im2col_indices(X, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                               self.__stride)
-        filters = self.__filters.reshape(self.__filters.shape[0], self.__filters.shape[1] * self.__filters.shape[2])
+
+        outHeight = int((X.shape[2] - self.__receptiveFieldSize + 2 * self.__zeroPadding) / self.__stride + 1)
+        outWidth = int((X.shape[3] - self.__receptiveFieldSize + 2 * self.__zeroPadding) / self.__stride + 1)
+
+        filters = self.__filters.reshape(self.__filters.shape[0], -1)
         weighted = np.dot(filters, XCol)
 
-        # reshape is done assuming that after the conv, the feature maps keep the dims of the input
-        reshaped = weighted.reshape((self.__filterNumber, X.shape[2], X.shape[3], X.shape[0]))
+        reshaped = weighted.reshape((self.__filterNumber, outHeight, outWidth, X.shape[0]))
 
-        transpose = reshaped.transpose((3, 0, 1, 2))
+        transpose = reshaped.transpose(3, 0, 1, 2)
 
         apply = self.__activation.apply(transpose)
         self.__cache = deepcopy(X), deepcopy(apply), deepcopy(XCol), deepcopy(transpose)
@@ -116,7 +122,8 @@ class ConvLayer(object):
 
     def backprop(self, gradients):
         X, XAct, XCol, XWeighted = self.__cache
-        activationBack = self.__activation.derivative(gradients)
+
+        activationBack = self.__activation.derivative(XWeighted, gradients)
 
         # reshape gradients for compatibilty: (filter_N X filter_h X filter_W X input_n)
         # and reshape to (filter_N X filter_h * filter_w * input_n)
@@ -126,12 +133,14 @@ class ConvLayer(object):
         dFeatures = np.dot(gradientsReshaped, np.transpose(XCol))
         dFeatures = np.reshape(dFeatures, self.__filters.shape)
 
-        self.__filters += -self.__hyperparams.featureStepSize * dFeatures
 
         # calculate gradients on input
         dXCol = np.dot(np.transpose(self.__filters), gradientsReshaped)
         dX = col2im_indices(dXCol, X.shape, self.__receptiveFieldSize, self.__receptiveFieldSize, self.__zeroPadding,
                             self.__stride)
+
+        #update values
+        self.__filters += -self.__hyperparams.featureStepSize * dFeatures
 
         return dX
 
@@ -145,7 +154,7 @@ class ConvLayer(object):
         return np.empty((1, 0))
 
     def getFormattedWeights(self):
-        return self.__filters.reshape(self.__filters.shape[0],  self.__filters.shape[1] ,self.__receptiveFieldSize,
+        return self.__filters.reshape(self.__filters.shape[0], self.__filters.shape[1], self.__receptiveFieldSize,
                                       self.__receptiveFieldSize)
 
     def getActivation(self):

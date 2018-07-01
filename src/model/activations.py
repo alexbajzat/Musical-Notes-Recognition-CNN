@@ -31,10 +31,9 @@ class ReLUActivation(Activation):
 
     # derivative calculation
     # threshold the input values to 0 if smaller
-    def derivative(self, X):
-        derivatives = deepcopy(X)
-        derivatives[derivatives <= 0] = 0
-        derivatives[derivatives > 0] = 1
+    def derivative(self, X, gradients):
+        derivatives = deepcopy(gradients)
+        derivatives[X <= 0] = 0
         return derivatives
 
 
@@ -52,5 +51,5 @@ class NonActivation(Activation):
         return deepcopy(X)
 
     # derivative calculation
-    def derivative(self, X):
-        return deepcopy(X)
+    def derivative(self, X, gradients):
+        return deepcopy(gradients)
